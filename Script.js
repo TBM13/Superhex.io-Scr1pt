@@ -4,7 +4,6 @@
 // @version      1.9.2
 // @license      MIT
 // @homepageURL  https://github.com/TBM13/Superhex.io-Scr1pt
-// @contributionURL https://www.paypal.me/tbm13
 // @icon         http://superhex.io/img/fav_icon_1.png
 // @description  Mod for Superhex.io
 // @description:es-ES Mod para Superhex.io
@@ -15,116 +14,16 @@
 
 // ==/UserScript==
 
-/*
-MIT License
-
-Copyright (c) 2020 TBM13
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
 var style = document.createElement("style"),
-    Text1TBM = localStorage.getItem("Text1TBM"), AdsTBM = localStorage.getItem("AdsTBM"), Language = localStorage.getItem("LangTBM"), currSkin = localStorage.getItem("selectedSkin"), currQuality = localStorage.getItem("quality"), zoomHack = localStorage.getItem("zoomTBM"), zoomValue = localStorage.getItem("zoomValTBM"), displayKills = localStorage.getItem("displayKillsTBM"),
+    Text1TBM = localStorage.getItem("Text1TBM"), AdsTBM = localStorage.getItem("AdsTBM"), currSkin = localStorage.getItem("selectedSkin"), currQuality = localStorage.getItem("quality"), zoomHack = localStorage.getItem("zoomTBM"), zoomValue = localStorage.getItem("zoomValTBM"), displayKills = localStorage.getItem("displayKillsTBM"),
     skinPag = 1,
     superhex = window.superhex,
-    invalidValueTxt = "Invalid value. Make sure to only use numbers.",
-    adsDeleted = false, adsRestoredTxt = "Ads restored. Reload the website to apply the changes.",
-    qChangeTxt = "Insert value. Example:\n0.25: Very low\n0.5: Low\n0.75: Medium\n1: High\n1.5: Very high\n2: Ultra", q27Txt = "WARNING: Values higher than 2.7 can cause problems.", q01Txt = "WARNING: Values lower than 0.1 can cause problems.", qInvalidTxt = "\nExample: 1.2", qChangedTxt = "Quality changed to: ",
-    sChangeTxt = "Skin ID:", sInvalidTxt = "Invalid ID. Make sure to only use numbers.", sChangedTxt = "Skin changed.", sErrorTxt = "An error has occurred. Make sure to insert a valid ID.", sTheSTxt = "The skin doesn't exist.",
-    pTextTxt = "Play button text:",
-    sUnlockekdTxt = "You already unlocked the skins.", sUnlockedsTxt = "The following skins were unlocked:", sChickenTxt = "Yellow chicken", sBirdTxt = "Light blue bird", sCowTxt = "Cow", sBird2Txt = "Red bird", sElephantTxt = "Elephant",
-    loadingScriptTxt = "Loading Superhex.io Scr1pt...", loadingInfoTxt = "If the script doesn't load, refresh the website (F5).",
-    sAlreadyTxt = "You are already using the skin ",
-    keyActionsTxt = "Hotkeys:\n\n1 = Hide/show Leaderboard.\n0 = Hide/show UI.\n2 = Hide/show FPS and connection info.",
-    partyTxt = "Party ID:", party5Txt = "The party ID must have more than 5 characters.", party6Txt = "The party ID must have less than 6 characters.",
-    zoomValueTxt = "Insert zoom value.\nBy default is 13 (higher value = more zoom)\nNote: You can also use the mouse wheel to zoom in/out.", zoomValueH = "Value can't be greater than 60.", zoomValueL = "Value can't be less than 5.",
-    diedTxt = " died", killedByTxt = " killed by ", killedHimselfTxt = " killed himself",
+    adsDeleted = false,
     highQB, mediumQB, lowQB, playBtn, playAgBtn, mMenuBtn, math_max_o = Math.max,
     players = [];
 
-style.type = "text/css";
 style.innerHTML = '.scr1ptPanel {background:rgba(0,60,0,0.5); border-style: solid; border-width: 3px; border-color: rgb(60,185,60,0.5); border-radius: 5px;} .scr1ptButton {line-height: 1; outline: none; color: white; background-color: #5CB85C; border-radius: 4px; border-width: 0px; transition: 0.2s;} .scr1ptButton:hover {background-color: #5ed15e; cursor: pointer;} .scr1ptButton:active {background-color: #4e9c4e;} .scr1ptButton.unselected {opacity: 0.5;} .scr1ptButton .spinner {display: none; vertical-align: middle;} .scr1ptButton.button-loading {background-color: #7D7D7D; color: white;} .scr1ptButton.button-loading .spinner {display: inline-block;} .scr1ptButton-grey {color: black; background-color: #f5f5f5;} .scr1ptButton-grey:hover {background-color: white; color: #5e5e5e;} .scr1ptButton-grey:active {background-color: #cccccc; color: #5e5e5e;} .scr1ptButton-gold {background-color: #c9c818;} .scr1ptButton-gold:hover {background-color: #d9d71a;} .scr1ptButton-gold:active {background-color: #aba913;}';
 document.getElementsByTagName("head")[0].appendChild(style);
-
-window.changeLang = function(write, ing) {
-    if (ing) {
-        localStorage.setItem('LangTBM', 'EN');
-        alert("Language changed to English. To see the changes, reload the website.");
-        document.getElementById("btn7").innerText = "Español (Spanish)";
-        document.getElementById("btn7").setAttribute("onclick", "changeLang(true, false);");
-    } else {
-        adsRestoredTxt = "Anuncios restaurados. Para ver los cambios, recarga la página.";
-        qChangeTxt = "Insertar valor. Ejemplo:\n0.25: Muy baja\n0.5: Baja\n0.75: Media\n1: Alta\n1.5: Muy alta\n2: Ultra";
-        q27Txt = "ADVERTENCIA: Un valor mayor a 2.7 puede causar problemas.";
-        q01Txt = "ADVERTENCIA: Un valor menor a 0.1 puede causar problemas.";
-        qInvalidTxt = "\nEjemplo: 1.2";
-        qChangedTxt = "Calidad cambiada a: ";
-        sChangeTxt = "ID de la Skin:";
-        sInvalidTxt = "ID inválido. Asegúrate de solo usar números.";
-        sChangedTxt = "Skin cambiada.";
-        sErrorTxt = "Se ha producido un error. Asegúrate de insertar un ID válido.";
-        sTheSTxt = "La skin no existe.";
-        pTextTxt = "Texto del botón Play (jugar):";
-        sUnlockekdTxt = "Ya tienes las skins desbloqueadas.";
-        sUnlockedsTxt = "Las siguientes skins fueron desbloqueadas:";
-        sChickenTxt = "Pollo amarillo";
-        sBirdTxt = "Ave celeste";
-        sCowTxt = "Vaca";
-        sBird2Txt = "Ave roja";
-        sElephantTxt = "Elefante";
-        sAlreadyTxt = "Ya estás usando la skin ";
-        partyTxt = "ID de la Party:";
-        party5Txt = "El ID de la fiesta debe tener más de 5 carácteres.";
-        party6Txt = "El ID de la fiesta debe tener menos de 6 carácteres.";
-        keyActionsTxt = "Teclas:\n\n1 = Oculta/muestra la Tabla de clasificación.\n0 = Oculta/muestra la UI.\n2 = Oculta/muestra los FPS y datos\n de conexión.";
-        document.getElementById("btn2").innerText = "Calidad personalizada";
-        document.getElementById("btn3").innerText = "Establecer Skin (ID)";
-        document.getElementById("btn5").innerText = "Texto del botón Play";
-        document.getElementById("check1Text").innerText = "Remover anuncios";
-        document.getElementById("check2Text").innerText = "Hack de Zoom";
-        document.getElementById("check3Text").innerText = "Mostrar muertes";
-        document.getElementById("btn6").innerText = "Desbloquear skins";
-        document.getElementById("btn7").innerText = "English (Inglés)";
-        document.getElementById("btn7").setAttribute("onclick", "changeLang(false, true);");
-        document.getElementById("btn8").innerText = "Crear Party";
-        document.getElementById("scrText2").innerText = keyActionsTxt;
-        zoomValueTxt = "Inserta el valor del hack de zoom.\nPor defecto es 13. (valor mayor = más zoom)\nNota: También puedes usar la rueda del mouse para acercar/alejar la cámara.";
-        zoomValueH = "El valor no puede ser mayor a 60.";
-        zoomValueL = "El valor no puede ser menor a 10.";
-        invalidValueTxt = "Valor inválido. Asegúrate de solo usar números.";
-        highQB.innerText = "Alta";
-        mediumQB.innerText = "Media";
-        lowQB.innerText = "Baja";
-        diedTxt = " murió"; killedByTxt = " asesinado por "; killedHimselfTxt = " se mató a si mismo";
-        Language = "ES";
-        if (write) {
-            localStorage.setItem('LangTBM', 'ES');
-            if (document.getElementById("btn2").getAttribute("class") == "green") document.getElementById("btn2").innerText = "Calidad personalizada (" + currQuality.toString() + ")";
-            alert("Idioma cambiado a Español.");
-        }
-    }
-};
-
-if (Language == "ES") {
-    loadingScriptTxt = "Cargando Superhex.io Scr1pt...";
-    loadingInfoTxt = "Si el script no carga, refresca la página (F5).";
-}
 
 var originalLoad = window.onload;
 window.onload = function () {
@@ -140,7 +39,6 @@ window.onload = function () {
     highQB = document.getElementById("button-quality-high");
     mediumQB = document.getElementById("button-quality-medium");
     lowQB = document.getElementById("button-quality-low");
-    if (Language == "ES") window.changeLang(false, false);
     if (AdsTBM) window.removeAds(false);
     if (Text1TBM) document.getElementById("button-play-text").innerText = Text1TBM;
     window.changeQuality(currQuality == null ? 0.75 : currQuality);
@@ -182,9 +80,9 @@ window.console.log = function(a, b, c, d, e, f, g) {
 window.notifyKill = function (victimID, killerID) {
     if (players[victimID] == null || players[victimID].length == 0) return;
 
-    var msg = players[victimID] + killedByTxt + players[killerID];
-    if (victimID == killerID) msg = players[victimID] + killedHimselfTxt;
-    else if (killerID.toString().trim().length == 0) msg = players[victimID] + diedTxt;
+    var msg = players[victimID] + " killed by " + players[killerID];
+    if (victimID == killerID) msg = players[victimID] + " killed himself";
+    else if (killerID.toString().trim().length == 0) msg = players[victimID] + " died";
 
     var lines = document.getElementById("killsText").innerText.split("\n");
     if (lines.length > 5)
@@ -220,19 +118,19 @@ window.changeSkin = function (ID) {
         } else if (ID <= 9) {
             if (skinPag == 2) window.skinChangePage(true, 1); else if (skinPag == 1) window.skinChangePage(true, 2);
         } else {
-            alert(sTheSTxt);
+            alert("The skin doesn't exist.");
             return;
         }
         superhex.selectSkin(ID);
         currSkin = ID;
-        alert(sChangedTxt);
-    } else alert(sAlreadyTxt);
+        alert("Skin changed.");
+    } else alert("You are already using the skin");
 };
 
 window.changeQuality = function (qualityValue) {
     superhex.setQuality(qualityValue);
     currQuality = localStorage.getItem("quality");
-    document.getElementById("btn2").innerText = Language == "ES" ? "Calidad personalizada" : "Custom Quality";
+    document.getElementById("btn2").innerText = "Custom Quality";
     if (currQuality != 1 && currQuality != 0.75 && currQuality != 0.5) {
         document.getElementById("btn2").setAttribute("class", "scr1ptButton");
         document.getElementById("btn2").innerText += " (" + currQuality.toString() + ")";
@@ -244,7 +142,7 @@ window.removeAds = function (checkBox) {
         if (!document.getElementById("checkAdBlock").checked) { //Restore Ads
             localStorage.removeItem("AdsTBM");
             adsDeleted = true;
-            alert(adsRestoredTxt);
+            alert("Ads restored. Reload the website to apply the changes.");
         } else {
             localStorage.setItem("AdsTBM", true);
             if (!adsDeleted) window.rAds();
@@ -297,18 +195,18 @@ window.goGitHub = function () { window.open("https://github.com/TBM13/Superhex.i
 window.goGreasyFork = function () { window.open("https://greasyfork.org/es/scripts/36071-superhex-io-scr1pt"); };
 
 window.changeQ = function () {
-    var QualityPrompt = Number(window.prompt(qChangeTxt));
-    if (QualityPrompt > 2.7) alert(q27Txt);
-    if (QualityPrompt < 0.1 && QualityPrompt > 0) alert(q01Txt);
-    if (QualityPrompt.toString() == "NaN") alert(invalidValueTxt + qInvalidTxt); else {
+    var QualityPrompt = Number(window.prompt("Insert value. Example:\n0.25: Very low\n0.5: Low\n0.75: Medium\n1: High\n1.5: Very high\n2: Ultra"));
+    if (QualityPrompt > 2.7) alert("WARNING: Values higher than 2.7 can cause problems.");
+    if (QualityPrompt < 0.1 && QualityPrompt > 0) alert("WARNING: Values lower than 0.1 can cause problems.");
+    if (QualityPrompt.toString() == "NaN") alert("Invalid value. Make sure to only use numbers.\nExample: 1.2"); else {
         if (QualityPrompt === 0) return;
         window.changeQuality(QualityPrompt);
-        alert(qChangedTxt + QualityPrompt);
+        alert("Quality changed to: " + QualityPrompt);
     }
 };
 
 window.changeS = function () {
-    var SkinPrompt = Number(window.prompt(sChangeTxt));
+    var SkinPrompt = Number(window.prompt("Skin ID:"));
     if (SkinPrompt == 0) return;
     SkinPrompt--;
     superhex.nextSkins();
@@ -319,7 +217,7 @@ window.changeS = function () {
     if (localStorage.getItem("likeClicked")) CowS2 = true;
     if (localStorage.getItem("subscribeClicked")) RedBirdS2 = true;
     if (localStorage.getItem("shareClicked")) ElephantS2 = true;
-    if (SkinPrompt.toString() == "NaN") alert(sInvalidTxt); else if (SkinPrompt => 0) {
+    if (SkinPrompt.toString() == "NaN") alert("Invalid ID. Make sure to only use numbers."); else if (SkinPrompt => 0) {
         if (SkinPrompt == 0) {
             if (!ChickenS2) localStorage.setItem("followClicked", 1);
             window.changeSkin(0);
@@ -345,14 +243,14 @@ window.changeS = function () {
                 window.changeSkin(SkinPrompt);
             } catch (err) {
                 console.error("Superhex.io Scr1pt - Change skin by ID Error (changeS()): " + err);
-                alert(sErrorTxt);
+                alert("An error has occurred. Make sure to insert a valid ID.");
             }
         }
     }
 };
 
 window.changeT1 = function () {
-    var Text1Prompt = window.prompt(pTextTxt);
+    var Text1Prompt = window.prompt("Play button text:");
     if (Text1Prompt != null && Text1Prompt.length > 0) {
         if (Text1Prompt != "Play") localStorage.setItem("Text1TBM", Text1Prompt); else localStorage.removeItem("Text1TBM");
         document.getElementById("button-play-text").innerText = Text1Prompt;
@@ -360,7 +258,7 @@ window.changeT1 = function () {
 };
 
 window.unlockSK = function () {
-    if (localStorage.getItem("shareClicked") && localStorage.getItem("subscribeClicked") && localStorage.getItem("likeClicked") && localStorage.getItem("tweetClicked") && localStorage.getItem("followClicked")) alert(sUnlockekdTxt); else {
+    if (localStorage.getItem("shareClicked") && localStorage.getItem("subscribeClicked") && localStorage.getItem("likeClicked") && localStorage.getItem("tweetClicked") && localStorage.getItem("followClicked")) alert("You already unlocked the skins."); else {
         var ChickenS = true, TweetS = true, CowS = true, RedBirdS = true, ElephantS = true;
         if (localStorage.getItem("followClicked")) ChickenS = false;
         if (localStorage.getItem("tweetClicked")) TweetS = false;
@@ -374,20 +272,20 @@ window.unlockSK = function () {
         localStorage.setItem("followClicked", 1);
         superhex.nextSkins();
         superhex.previousSkins();
-        var msg = sUnlockedsTxt;
-        if (ChickenS) msg += "\n" + sChickenTxt;
-        if (TweetS) msg += "\n" + sBirdTxt;
-        if (CowS) msg += "\n" + sCowTxt;
-        if (RedBirdS) msg += "\n" + sBird2Txt;
-        if (ElephantS) msg += "\n" + sElephantTxt;
+        var msg = "The following skins were unlocked:";
+        if (ChickenS) msg += "\nYellow chicken";
+        if (TweetS) msg += "\nLight blue bird";
+        if (CowS) msg += "\nCow";
+        if (RedBirdS) msg += "\nRed bird";
+        if (ElephantS) msg += "\nElephant";
         alert(msg);
     }
 };
 
 window.mkParty = function () {
-    var partyPrompt = window.prompt(partyTxt);
+    var partyPrompt = window.prompt("Party ID:");
     if (partyPrompt !== null && partyPrompt.length != 0) {
-        if (partyPrompt.length < 5) alert(party5Txt); else if (partyPrompt.length > 6) alert(party6Txt); else {
+        if (partyPrompt.length < 5) alert("The party ID must have more than 5 characters."); else if (partyPrompt.length > 6) alert("The party ID must have less than 6 characters."); else {
             document.getElementById("create-party").style.display = "none";
             document.getElementById("in-party").style.display = "block";
             window.location.hash = partyPrompt;
@@ -427,10 +325,10 @@ window.zoomH = function (message) {
 };
 
 window.setZoomH = function () {
-    var zoomHPrompt = window.prompt(zoomValueTxt);
+    var zoomHPrompt = window.prompt("Insert zoom value.\nBy default is 13 (higher value = more zoom)\nNote: You can also use the mouse wheel to zoom in/out.");
     if (zoomHPrompt !== null && zoomHPrompt.length != 0) {
         zoomHPrompt = Number(zoomHPrompt);
-        if (zoomHPrompt > 60) alert(zoomValueH); else if (zoomHPrompt < 5) alert(zoomValueL); else if (zoomHPrompt.toString() == "NaN") alert(invalidValueTxt); else {
+        if (zoomHPrompt > 60) alert("Value can't be greater than 60."); else if (zoomHPrompt < 5) alert("Value can't be less than 5."); else if (zoomHPrompt.toString() == "NaN") alert("Invalid value. Make sure to only use numbers."); else {
             window.zoomValue = zoomHPrompt;
             localStorage.setItem("zoomValTBM", zoomHPrompt);
         }
@@ -449,12 +347,12 @@ window.toggleDisplayKills = function () {
 
 var scrText1 = document.createElement("h2");
 scrText1.setAttribute("style", "color: white; position: fixed; top: 70px; left: 5px;");
-scrText1.innerText = loadingScriptTxt;
+scrText1.innerText = "Loading Superhex.io Scr1pt...";
 document.getElementById("homepage").appendChild(scrText1);
 
 var scrTextInfo = document.createElement("h4");
 scrTextInfo.setAttribute("style", "color: white; position: fixed; top: 120px; left: 5px;");
-scrTextInfo.innerText = loadingInfoTxt;
+scrTextInfo.innerText = "If the script doesn't load, refresh the website (F5).";
 document.getElementById("homepage").appendChild(scrTextInfo);
 
 window.mkGui = function() {
@@ -529,15 +427,6 @@ window.mkGui = function() {
     btn8.setAttribute("onclick", "mkParty();");
     mainPanel.appendChild(btn8);
 
-    var btn7 = document.createElement("Button");
-    btn7.setAttribute("style", "position: relative; top: 70px; left: 15px; height: 25px; width: 140px;");
-    btn7.setAttribute("class", "scr1ptButton");
-    btn7.setAttribute("type", "button");
-    btn7.setAttribute("id", "btn7");
-    btn7.innerText = "Español (Spanish)";
-    btn7.setAttribute("onclick", "changeLang(true, false);");
-    mainPanel.appendChild(btn7);
-
     var versionText = document.createElement("h5");
     scrTextInfo.setAttribute("style", "color: rgba(255,255,255,0.6); position: absolute; bottom: -20px; right: 5px;");
     scrTextInfo.innerText = "v1.9.2";
@@ -606,7 +495,7 @@ window.mkGui = function() {
     var scrText2 = document.createElement("h4");
     scrText2.setAttribute("style", "color: white; position: relative; left: 10px;");
     scrText2.setAttribute("id", "scrText2");
-    scrText2.innerText = keyActionsTxt;
+    scrText2.innerText = "Hotkeys:\n\n1 = Hide/show Leaderboard.\n0 = Hide/show UI.\n2 = Hide/show FPS and connection info.";
     hotkeysPanel.appendChild(scrText2);
 
     var killsText = document.createElement("h4");
