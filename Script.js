@@ -15,12 +15,11 @@
 // ==/UserScript==
 
 var style = document.createElement("style"),
-    Text1TBM = localStorage.getItem("Text1TBM"), AdsTBM = localStorage.getItem("AdsTBM"), currSkin = localStorage.getItem("selectedSkin"), currQuality = localStorage.getItem("quality"), zoomHack = localStorage.getItem("zoomTBM"), zoomValue = localStorage.getItem("zoomValTBM"), displayKills = localStorage.getItem("displayKillsTBM"),
+    Text1TBM = localStorage.getItem("Text1TBM"), AdsTBM = localStorage.getItem("AdsTBM"), currSkin = localStorage.getItem("selectedSkin"), currQuality = localStorage.getItem("quality"), zoomHack = localStorage.getItem("zoomTBM"), zoomValue = localStorage.getItem("zoomValTBM"),
     skinPag = 1,
     superhex = window.superhex,
     adsDeleted = false,
-    highQB, mediumQB, lowQB, playBtn, playAgBtn, mMenuBtn, math_max_o = Math.max,
-    players = [];
+    highQB, mediumQB, lowQB, playBtn, playAgBtn, mMenuBtn, math_max_o = Math.max;
 
 style.innerHTML = '.scr1ptPanel {background:rgba(0,60,0,0.5); border-style: solid; border-width: 3px; border-color: rgb(60,185,60,0.5); border-radius: 5px;} .scr1ptButton {line-height: 1; outline: none; color: white; background-color: #5CB85C; border-radius: 4px; border-width: 0px; transition: 0.2s;} .scr1ptButton:hover {background-color: #5ed15e; cursor: pointer;} .scr1ptButton:active {background-color: #4e9c4e;} .scr1ptButton.unselected {opacity: 0.5;} .scr1ptButton .spinner {display: none; vertical-align: middle;} .scr1ptButton.button-loading {background-color: #7D7D7D; color: white;} .scr1ptButton.button-loading .spinner {display: inline-block;} .scr1ptButton-grey {color: black; background-color: #f5f5f5;} .scr1ptButton-grey:hover {background-color: white; color: #5e5e5e;} .scr1ptButton-grey:active {background-color: #cccccc; color: #5e5e5e;} .scr1ptButton-gold {background-color: #c9c818;} .scr1ptButton-gold:hover {background-color: #d9d71a;} .scr1ptButton-gold:active {background-color: #aba913;}';
 document.getElementsByTagName("head")[0].appendChild(style);
@@ -53,45 +52,6 @@ window.onload = function () {
     mediumQB.setAttribute("class", mediumQB.className == "green" ? "scr1ptButton" : "scr1ptButton unselected");
     lowQB.setAttribute("onclick", "changeQuality(0.5);");
     lowQB.setAttribute("class", lowQB.className == "green" ? "scr1ptButton" : "scr1ptButton unselected");
-};
-
-var originalConsoleLog = window.console.log;
-window.console.log = function(a, b, c, d, e, f, g) {
-    if (!a) a = "";
-    if (!b) b = "";
-    if (!c) c = "";
-    if (!d) d = "";
-    if (!e) e = "";
-    if (!f) f = "";
-    if (!g) g = "";
-    originalConsoleLog(a, b, c, d, e, f, g);
-
-    if (a.includes("username received for player"))
-    {
-        while (players.length < b) players.push("");
-        players[b] = c;
-    }
-    else if (a.includes("player is dead") && displayKills == "1")
-    {
-        window.notifyKill(b, d);
-    }
-}
-
-window.notifyKill = function (victimID, killerID) {
-    if (players[victimID] == null || players[victimID].length == 0) return;
-
-    var msg = players[victimID] + " killed by " + players[killerID];
-    if (victimID == killerID) msg = players[victimID] + " killed himself";
-    else if (killerID.toString().trim().length == 0) msg = players[victimID] + " died";
-
-    var lines = document.getElementById("killsText").innerText.split("\n");
-    if (lines.length > 5)
-    {
-        lines.splice(0,1);
-        document.getElementById("killsText").innerText = lines.join('\n');
-    }
-
-    document.getElementById("killsText").innerText += "\n" + msg;
 };
 
 window.skinChangePage = function (next, cantidad) {
@@ -335,16 +295,6 @@ window.setZoomH = function () {
     }
 };
 
-window.toggleDisplayKills = function () {
-    if (displayKills == "1") {
-        localStorage.setItem("displayKillsTBM", "0");
-        displayKills = "0";
-    } else {
-        localStorage.setItem("displayKillsTBM", "1");
-        displayKills = "1";
-    }
-}
-
 var scrText1 = document.createElement("h2");
 scrText1.setAttribute("style", "color: white; position: fixed; top: 70px; left: 5px;");
 scrText1.innerText = "Loading Superhex.io Scr1pt...";
@@ -471,21 +421,6 @@ window.mkGui = function() {
     btnZHS.setAttribute("onclick", "setZoomH();");
     mainPanel.appendChild(btnZHS);
 
-    var check3 = document.createElement("INPUT");
-    check3.setAttribute("type", "checkbox");
-    check3.setAttribute("id", "check3");
-    check3.setAttribute("style", "position: absolute; top: 310px; left: 15px;");
-    check3.setAttribute("onclick", "toggleDisplayKills();");
-    mainPanel.appendChild(check3);
-
-    check3.checked = displayKills == "1";
-
-    var check3Text = document.createElement("h5");
-    check3Text.setAttribute("style", "color: white; position: absolute; top: 290px; left: 35px;");
-    check3Text.setAttribute("id", "check3Text");
-    check3Text.innerText = "Show kills";
-    mainPanel.appendChild(check3Text);
-
     var hotkeysPanel = document.createElement("Div");
     hotkeysPanel.setAttribute("style", "position: fixed; bottom: -4px; right: -4px; height:150px; width:300px;");
     hotkeysPanel.setAttribute("class", "scr1ptPanel");
@@ -497,9 +432,4 @@ window.mkGui = function() {
     scrText2.setAttribute("id", "scrText2");
     scrText2.innerText = "Hotkeys:\n\n1 = Hide/show Leaderboard.\n0 = Hide/show UI.\n2 = Hide/show FPS and connection info.";
     hotkeysPanel.appendChild(scrText2);
-
-    var killsText = document.createElement("h4");
-    killsText.setAttribute("style", "color: rgba(255,255,255,0.6); position: fixed; text-align: center; right: 10px; bottom: 0px; z-index: 1;");
-    killsText.setAttribute("id", "killsText");
-    window.document.body.appendChild(killsText);
 };
