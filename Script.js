@@ -19,20 +19,14 @@ var style = document.createElement("style"),
     skinPag = 1,
     superhex = window.superhex,
     adsDeleted = false,
-    highQB, mediumQB, lowQB, playBtn, playAgBtn, mMenuBtn, math_max_o = Math.max;
+    highQB, mediumQB, lowQB, math_max_o = Math.max;
 
 style.innerHTML = '.scr1ptPanel {background:rgba(0,60,0,0.5); border-style: solid; border-width: 3px; border-color: rgb(60,185,60,0.5); border-radius: 5px;} .scr1ptButton {line-height: 1; outline: none; color: white; background-color: #5CB85C; border-radius: 4px; border-width: 0px; transition: 0.2s;} .scr1ptButton:hover {background-color: #5ed15e; cursor: pointer;} .scr1ptButton:active {background-color: #4e9c4e;} .scr1ptButton.unselected {opacity: 0.5;} .scr1ptButton .spinner {display: none; vertical-align: middle;} .scr1ptButton.button-loading {background-color: #7D7D7D; color: white;} .scr1ptButton.button-loading .spinner {display: inline-block;} .scr1ptButton-grey {color: black; background-color: #f5f5f5;} .scr1ptButton-grey:hover {background-color: white; color: #5e5e5e;} .scr1ptButton-grey:active {background-color: #cccccc; color: #5e5e5e;} .scr1ptButton-gold {background-color: #c9c818;} .scr1ptButton-gold:hover {background-color: #d9d71a;} .scr1ptButton-gold:active {background-color: #aba913;}';
 document.getElementsByTagName("head")[0].appendChild(style);
 
-var originalLoad = window.onload;
-window.onload = () => {
-    if (originalLoad) originalLoad();
+function init() {
+    createGui();
 
-    mkGui();
-
-    playBtn = document.getElementById("button-play");
-    playAgBtn = document.getElementById("button-play-again");
-    mMenuBtn = document.getElementById("button-main-menu");
     highQB = document.getElementById("button-quality-high");
     mediumQB = document.getElementById("button-quality-medium");
     lowQB = document.getElementById("button-quality-low");
@@ -42,17 +36,13 @@ window.onload = () => {
     window.zoomValue = zoomValue ? Number(zoomValue) : 13;
     if (zoomHack == "True") zoomH(false);
 
-    if (playBtn.className == "green") playBtn.setAttribute("class", "scr1ptButton");
-    if (playAgBtn.className == "playagain green") playAgBtn.setAttribute("class", "playagain scr1ptButton");
-    if (mMenuBtn.className == "mainmenu grey") mMenuBtn.setAttribute("class", "mainmenu scr1ptButton scr1ptButton-grey");
-
     highQB.onclick = () => changeQuality(1);
     highQB.setAttribute("class", highQB.className == "green" ? "scr1ptButton" : "scr1ptButton unselected");
     mediumQB.onclick = () => changeQuality(0.75);
     mediumQB.setAttribute("class", mediumQB.className == "green" ? "scr1ptButton" : "scr1ptButton unselected");
     lowQB.onclick = () => changeQuality(0.5);
     lowQB.setAttribute("class", lowQB.className == "green" ? "scr1ptButton" : "scr1ptButton unselected");
-};
+}
 
 function changeQuality(qualityValue) {
     superhex.setQuality(qualityValue);
@@ -211,7 +201,7 @@ scrTextInfo.setAttribute("style", "color: white; position: fixed; top: 120px; le
 scrTextInfo.innerText = "If the script doesn't load, refresh the website (F5).";
 document.getElementById("homepage").appendChild(scrTextInfo);
 
-function mkGui() {
+function createGui() {
     scrTextInfo.remove();
     scrText1.innerText = "Superhex.io Scr1pt";
 
@@ -311,4 +301,11 @@ function mkGui() {
     scrText2.setAttribute("id", "scrText2");
     scrText2.innerText = "Hotkeys:\n\n1 = Hide/show Leaderboard.\n0 = Hide/show UI.\n2 = Hide/show FPS and connection info.";
     hotkeysPanel.appendChild(scrText2);
+}
+
+if (document.readyState == "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+}
+else {
+    init();
 }
