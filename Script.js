@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 var style = document.createElement("style"),
-    Text1TBM = localStorage.getItem("Text1TBM"), AdsTBM = localStorage.getItem("AdsTBM"), currSkin = localStorage.getItem("selectedSkin"), currQuality = localStorage.getItem("quality"), zoomHack = localStorage.getItem("zoomTBM"), zoomValue = localStorage.getItem("zoomValTBM"),
+    AdsTBM = localStorage.getItem("AdsTBM"), currSkin = localStorage.getItem("selectedSkin"), currQuality = localStorage.getItem("quality"), zoomHack = localStorage.getItem("zoomTBM"), zoomValue = localStorage.getItem("zoomValTBM"),
     skinPag = 1,
     superhex = window.superhex,
     adsDeleted = false,
@@ -39,7 +39,6 @@ window.onload = function () {
     mediumQB = document.getElementById("button-quality-medium");
     lowQB = document.getElementById("button-quality-low");
     if (AdsTBM) window.removeAds(false);
-    if (Text1TBM) document.getElementById("button-play-text").innerText = Text1TBM;
     window.changeQuality(currQuality == null ? 0.75 : currQuality);
     window.zoomValue = zoomValue ? Number(zoomValue) : 13;
     if (zoomHack == "True") window.zoomH(false);
@@ -209,14 +208,6 @@ window.changeS = function () {
     }
 };
 
-window.changeT1 = function () {
-    var Text1Prompt = window.prompt("Play button text:");
-    if (Text1Prompt != null && Text1Prompt.length > 0) {
-        if (Text1Prompt != "Play") localStorage.setItem("Text1TBM", Text1Prompt); else localStorage.removeItem("Text1TBM");
-        document.getElementById("button-play-text").innerText = Text1Prompt;
-    }
-};
-
 window.unlockSK = function () {
     if (localStorage.getItem("shareClicked") && localStorage.getItem("subscribeClicked") && localStorage.getItem("likeClicked") && localStorage.getItem("tweetClicked") && localStorage.getItem("followClicked")) alert("You already unlocked the skins."); else {
         var ChickenS = true, TweetS = true, CowS = true, RedBirdS = true, ElephantS = true;
@@ -349,15 +340,6 @@ window.mkGui = function() {
     btn3.innerText = "Set Skin (ID)";
     btn3.setAttribute("onclick", "changeS();");
     mainPanel.appendChild(btn3);
-
-    var btn5 = document.createElement("Button");
-    btn5.setAttribute("style", "position: relative; top: 40px; left: 15px; height: 25px; width: 140px;");
-    btn5.setAttribute("class", "scr1ptButton");
-    btn5.setAttribute("type", "button");
-    btn5.setAttribute("id", "btn5");
-    btn5.innerText = "Set Play button text";
-    btn5.setAttribute("onclick", "changeT1();");
-    mainPanel.appendChild(btn5);
 
     var btn6 = document.createElement("Button");
     btn6.setAttribute("style", "position: relative; top: 50px; left: 15px; height: 25px; width: 140px;");
