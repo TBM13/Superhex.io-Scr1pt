@@ -6,12 +6,10 @@
 // @homepageURL  https://github.com/TBM13/Superhex.io-Scr1pt
 // @icon         http://superhex.io/img/fav_icon_1.png
 // @description  Mod for Superhex.io
-// @description:es-ES Mod para Superhex.io
 // @author       TBM13
 // @match        *://superhex.io/*
 // @match        www.superhex.io/*
 // @grant        none
-
 // ==/UserScript==
 
 var style = document.createElement("style"),
@@ -19,7 +17,7 @@ var style = document.createElement("style"),
     skinPag = 1,
     superhex = window.superhex,
     adsDeleted = false,
-    highQB, mediumQB, lowQB, math_max_o = Math.max;
+    math_max_o = Math.max;
 
 style.innerHTML = '.scr1ptPanel {background:rgba(0,60,0,0.5); border-style: solid; border-width: 3px; border-color: rgb(60,185,60,0.5); border-radius: 5px;} .scr1ptButton {line-height: 1; outline: none; color: white; background-color: #5CB85C; border-radius: 4px; border-width: 0px; transition: 0.2s;} .scr1ptButton:hover {background-color: #5ed15e; cursor: pointer;} .scr1ptButton:active {background-color: #4e9c4e;} .scr1ptButton.unselected {opacity: 0.5;} .scr1ptButton .spinner {display: none; vertical-align: middle;} .scr1ptButton.button-loading {background-color: #7D7D7D; color: white;} .scr1ptButton.button-loading .spinner {display: inline-block;} .scr1ptButton-grey {color: black; background-color: #f5f5f5;} .scr1ptButton-grey:hover {background-color: white; color: #5e5e5e;} .scr1ptButton-grey:active {background-color: #cccccc; color: #5e5e5e;} .scr1ptButton-gold {background-color: #c9c818;} .scr1ptButton-gold:hover {background-color: #d9d71a;} .scr1ptButton-gold:active {background-color: #aba913;}';
 document.getElementsByTagName("head")[0].appendChild(style);
@@ -27,14 +25,14 @@ document.getElementsByTagName("head")[0].appendChild(style);
 function init() {
     createGui();
 
-    highQB = document.getElementById("button-quality-high");
-    mediumQB = document.getElementById("button-quality-medium");
-    lowQB = document.getElementById("button-quality-low");
-
     if (AdsTBM) removeAds(false);
     changeQuality(currQuality == null ? 0.75 : currQuality);
     window.zoomValue = zoomValue ? Number(zoomValue) : 13;
     if (zoomHack == "True") zoomH(false);
+
+    let highQB = document.getElementById("button-quality-high");
+    let mediumQB = document.getElementById("button-quality-medium");
+    let lowQB = document.getElementById("button-quality-low");
 
     highQB.onclick = () => changeQuality(1);
     highQB.setAttribute("class", highQB.className == "green" ? "scr1ptButton" : "scr1ptButton unselected");
@@ -196,13 +194,7 @@ scrText1.setAttribute("style", "color: white; position: fixed; top: 70px; left: 
 scrText1.innerText = "Loading Superhex.io Scr1pt...";
 document.getElementById("homepage").appendChild(scrText1);
 
-var scrTextInfo = document.createElement("h4");
-scrTextInfo.setAttribute("style", "color: white; position: fixed; top: 120px; left: 5px;");
-scrTextInfo.innerText = "If the script doesn't load, refresh the website (F5).";
-document.getElementById("homepage").appendChild(scrTextInfo);
-
 function createGui() {
-    scrTextInfo.remove();
     scrText1.innerText = "Superhex.io Scr1pt";
 
     var mainPanel = document.createElement("Div");
@@ -247,9 +239,9 @@ function createGui() {
     mainPanel.appendChild(btn6);
 
     var versionText = document.createElement("h5");
-    scrTextInfo.setAttribute("style", "color: rgba(255,255,255,0.6); position: absolute; bottom: -20px; right: 5px;");
-    scrTextInfo.innerText = "v1.9.2";
-    mainPanel.appendChild(scrTextInfo);
+    versionText.setAttribute("style", "color: rgba(255,255,255,0.6); position: absolute; bottom: -20px; right: 5px;");
+    versionText.innerText = "v1.9.2";
+    mainPanel.appendChild(versionText);
 
     var Check1 = document.createElement("INPUT");
     Check1.setAttribute("type", "checkbox");
