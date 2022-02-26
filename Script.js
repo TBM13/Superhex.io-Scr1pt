@@ -25,41 +25,48 @@ style.innerHTML = '.scr1ptPanel {background:rgba(0,60,0,0.5); border-style: soli
 document.getElementsByTagName("head")[0].appendChild(style);
 
 var originalLoad = window.onload;
-window.onload = function () {
+window.onload = () => {
     if (originalLoad) originalLoad();
-    window.mkGui();
+
+    mkGui();
+
     playBtn = document.getElementById("button-play");
     playAgBtn = document.getElementById("button-play-again");
     mMenuBtn = document.getElementById("button-main-menu");
     highQB = document.getElementById("button-quality-high");
     mediumQB = document.getElementById("button-quality-medium");
     lowQB = document.getElementById("button-quality-low");
-    if (AdsTBM) window.removeAds(false);
-    window.changeQuality(currQuality == null ? 0.75 : currQuality);
+
+    if (AdsTBM) removeAds(false);
+    changeQuality(currQuality == null ? 0.75 : currQuality);
     window.zoomValue = zoomValue ? Number(zoomValue) : 13;
-    if (zoomHack == "True") window.zoomH(false);
+    if (zoomHack == "True") zoomH(false);
+
     if (playBtn.className == "green") playBtn.setAttribute("class", "scr1ptButton");
     if (playAgBtn.className == "playagain green") playAgBtn.setAttribute("class", "playagain scr1ptButton");
     if (mMenuBtn.className == "mainmenu grey") mMenuBtn.setAttribute("class", "mainmenu scr1ptButton scr1ptButton-grey");
-    highQB.setAttribute("onclick", "changeQuality(1);");
+
+    highQB.onclick = () => changeQuality(1);
     highQB.setAttribute("class", highQB.className == "green" ? "scr1ptButton" : "scr1ptButton unselected");
-    mediumQB.setAttribute("onclick", "changeQuality(0.75);");
+    mediumQB.onclick = () => changeQuality(0.75);
     mediumQB.setAttribute("class", mediumQB.className == "green" ? "scr1ptButton" : "scr1ptButton unselected");
-    lowQB.setAttribute("onclick", "changeQuality(0.5);");
+    lowQB.onclick = () => changeQuality(0.5);
     lowQB.setAttribute("class", lowQB.className == "green" ? "scr1ptButton" : "scr1ptButton unselected");
 };
 
-window.changeQuality = function (qualityValue) {
+function changeQuality(qualityValue) {
     superhex.setQuality(qualityValue);
     currQuality = localStorage.getItem("quality");
     document.getElementById("btn2").innerText = "Custom Quality";
     if (currQuality != 1 && currQuality != 0.75 && currQuality != 0.5) {
         document.getElementById("btn2").setAttribute("class", "scr1ptButton");
         document.getElementById("btn2").innerText += " (" + currQuality.toString() + ")";
-    } else document.getElementById("btn2").setAttribute("class", "scr1ptButton unselected");
-};
+    } else {
+        document.getElementById("btn2").setAttribute("class", "scr1ptButton unselected");
+    }
+}
 
-window.removeAds = function (checkBox) {
+function removeAds(checkBox) {
     if (checkBox) {
         if (!document.getElementById("checkAdBlock").checked) { //Restore Ads
             localStorage.removeItem("AdsTBM");
@@ -67,27 +74,28 @@ window.removeAds = function (checkBox) {
             alert("Ads restored. Reload the website to apply the changes.");
         } else {
             localStorage.setItem("AdsTBM", true);
-            if (!adsDeleted) window.rAds();
+            if (!adsDeleted) rAds();
         }
-    } else setTimeout(function () { window.rAds(); }, 400);
-};
+    } else setTimeout(function () { rAds(); }, 400);
+}
 
-window.rAds = function () {
+function rAds() {
     superhex.clickPlay = superhex.aipComplete;
     superhex.clickPlayAgain = superhex.aipComplete;
-    window.removeAdElement(document.getElementById("TKS_superhex-io_300x250"));
-    window.removeAdElement(document.getElementById("respawn-ad"));
-    window.removeAdElement(document.getElementsByClassName("curse-ad")[0]);
-};
+    removeAdElement(document.getElementById("TKS_superhex-io_300x250"));
+    removeAdElement(document.getElementById("respawn-ad"));
+    removeAdElement(document.getElementsByClassName("curse-ad")[0]);
+}
 
-window.removeAdElement = function (elem) {
+function removeAdElement(elem) {
     elem.innerHTML = "";
     elem.setAttribute("style", "display: none;");
-};
+}
 
 var originalKeyup = document.onkeyup;
-document.onkeyup = function (e) {
+document.onkeyup = (e) => {
     if (originalKeyup) originalKeyup(e);
+
     try {
         e = e || window.event;
         var key = e.which || e.keyCode;
@@ -112,22 +120,22 @@ document.onkeyup = function (e) {
     }
 };
 
-window.goGitHub = function () { window.open("https://github.com/TBM13/Superhex.io-Scr1pt"); };
+function goGitHub() { window.open("https://github.com/TBM13/Superhex.io-Scr1pt"); }
 
-window.goGreasyFork = function () { window.open("https://greasyfork.org/es/scripts/36071-superhex-io-scr1pt"); };
+function goGreasyFork() { window.open("https://greasyfork.org/es/scripts/36071-superhex-io-scr1pt"); }
 
-window.changeQ = function () {
+function changeQ() {
     var QualityPrompt = Number(window.prompt("Insert value. Example:\n0.25: Very low\n0.5: Low\n0.75: Medium\n1: High\n1.5: Very high\n2: Ultra"));
     if (QualityPrompt > 2.7) alert("WARNING: Values higher than 2.7 can cause problems.");
     if (QualityPrompt < 0.1 && QualityPrompt > 0) alert("WARNING: Values lower than 0.1 can cause problems.");
     if (QualityPrompt.toString() == "NaN") alert("Invalid value. Make sure to only use numbers.\nExample: 1.2"); else {
         if (QualityPrompt === 0) return;
-        window.changeQuality(QualityPrompt);
+        changeQuality(QualityPrompt);
         alert("Quality changed to: " + QualityPrompt);
     }
-};
+}
 
-window.unlockSK = function () {
+function unlockSK() {
     if (localStorage.getItem("shareClicked") && localStorage.getItem("subscribeClicked") && localStorage.getItem("likeClicked") && localStorage.getItem("tweetClicked") && localStorage.getItem("followClicked")) alert("You already unlocked the skins."); else {
         var ChickenS = true, TweetS = true, CowS = true, RedBirdS = true, ElephantS = true;
         if (localStorage.getItem("followClicked")) ChickenS = false;
@@ -150,9 +158,9 @@ window.unlockSK = function () {
         if (ElephantS) msg += "\nElephant";
         alert(msg);
     }
-};
+}
 
-window.zoomH = function (message) {
+function zoomH(message) {
     if (zoomHack == "True" && message) {
         localStorage.removeItem("zoomTBM");
         Math.max = math_max_o;
@@ -180,9 +188,9 @@ window.zoomH = function (message) {
         };
     }
     zoomHack = localStorage.getItem("zoomTBM");
-};
+}
 
-window.setZoomH = function () {
+function setZoomH() {
     var zoomHPrompt = window.prompt("Insert zoom value.\nBy default is 13 (higher value = more zoom)\nNote: You can also use the mouse wheel to zoom in/out.");
     if (zoomHPrompt !== null && zoomHPrompt.length != 0) {
         zoomHPrompt = Number(zoomHPrompt);
@@ -191,7 +199,7 @@ window.setZoomH = function () {
             localStorage.setItem("zoomValTBM", zoomHPrompt);
         }
     }
-};
+}
 
 var scrText1 = document.createElement("h2");
 scrText1.setAttribute("style", "color: white; position: fixed; top: 70px; left: 5px;");
@@ -203,7 +211,7 @@ scrTextInfo.setAttribute("style", "color: white; position: fixed; top: 120px; le
 scrTextInfo.innerText = "If the script doesn't load, refresh the website (F5).";
 document.getElementById("homepage").appendChild(scrTextInfo);
 
-window.mkGui = function() {
+function mkGui() {
     scrTextInfo.remove();
     scrText1.innerText = "Superhex.io Scr1pt";
 
@@ -219,7 +227,7 @@ window.mkGui = function() {
     btn.setAttribute("type", "button");
     btn.setAttribute("id", "btn");
     btn.innerText = "GitHub";
-    btn.setAttribute("onclick", "goGitHub();");
+    btn.onclick = () => goGitHub();
     mainPanel.appendChild(btn);
 
     var btn2 = document.createElement("Button");
@@ -227,7 +235,7 @@ window.mkGui = function() {
     btn2.setAttribute("type", "button");
     btn2.setAttribute("id", "btn2");
     btn2.innerText = "Custom Quality";
-    btn2.setAttribute("onclick", "changeQ();");
+    btn2.onclick = () => changeQ();
     document.getElementById("button-quality-high").parentElement.appendChild(btn2);
 
     var btnGF = document.createElement("Button");
@@ -236,7 +244,7 @@ window.mkGui = function() {
     btnGF.setAttribute("type", "button");
     btnGF.setAttribute("id", "btnGF");
     btnGF.innerText = "Greasy Fork";
-    btnGF.setAttribute("onclick", "goGreasyFork();");
+    btnGF.onclick = () => goGreasyFork();
     mainPanel.appendChild(btnGF);
 
     var btn6 = document.createElement("Button");
@@ -245,7 +253,7 @@ window.mkGui = function() {
     btn6.setAttribute("type", "button");
     btn6.setAttribute("id", "btn6");
     btn6.innerText = "Unlock skins";
-    btn6.setAttribute("onclick", "unlockSK();");
+    btn6.onclick = () => unlockSK();
     mainPanel.appendChild(btn6);
 
     var versionText = document.createElement("h5");
@@ -257,7 +265,7 @@ window.mkGui = function() {
     Check1.setAttribute("type", "checkbox");
     Check1.setAttribute("id", "checkAdBlock");
     Check1.setAttribute("style", "position: absolute; top: 260px; left: 15px;");
-    Check1.setAttribute("onclick", "removeAds(true);");
+    Check1.onclick = () => removeAds(true);
     mainPanel.appendChild(Check1);
 
     Check1.checked = AdsTBM;
@@ -272,7 +280,7 @@ window.mkGui = function() {
     Check2.setAttribute("type", "checkbox");
     Check2.setAttribute("id", "checkZoom");
     Check2.setAttribute("style", "position: absolute; top: 285px; left: 15px;");
-    Check2.setAttribute("onclick", "zoomH(true);");
+    Check2.onclick = () => zoomH(true);
     mainPanel.appendChild(Check2);
 
     Check2.checked = zoomHack == "True";
@@ -289,7 +297,7 @@ window.mkGui = function() {
     btnZHS.innerHTML = "<img src='https://lh3.googleusercontent.com/Abm4DjvPOP55GK2MCe9gYh8M1ZJa7ws71oXcW2q6Rl1pQXIQ_bUcVxbN5vZ8_6pmP248O-uQEN2fUxq-xzFlzefdXyEBakvzEgGKzIwSkcdSBHdM2PwtgpgXbMvbP_N7FSI4BYIujg=s16-no' style='position: absolute; left: 0px; top: 0px;'/>";
     btnZHS.setAttribute("type", "button");
     btnZHS.setAttribute("id", "btnZHS");
-    btnZHS.setAttribute("onclick", "setZoomH();");
+    btnZHS.onclick = () => setZoomH();
     mainPanel.appendChild(btnZHS);
 
     var hotkeysPanel = document.createElement("Div");
@@ -303,4 +311,4 @@ window.mkGui = function() {
     scrText2.setAttribute("id", "scrText2");
     scrText2.innerText = "Hotkeys:\n\n1 = Hide/show Leaderboard.\n0 = Hide/show UI.\n2 = Hide/show FPS and connection info.";
     hotkeysPanel.appendChild(scrText2);
-};
+}
