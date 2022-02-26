@@ -9,6 +9,7 @@
 // @author       TBM13
 // @match        *://superhex.io/*
 // @match        www.superhex.io/*
+// @run-at       document-end
 // @grant        none
 // ==/UserScript==
 
@@ -189,13 +190,11 @@ function setZoomH() {
     }
 }
 
-var scrText1 = document.createElement("h2");
-scrText1.setAttribute("style", "color: white; position: fixed; top: 70px; left: 5px;");
-scrText1.innerText = "Loading Superhex.io Scr1pt...";
-document.getElementById("homepage").appendChild(scrText1);
-
 function createGui() {
+    var scrText1 = document.createElement("h2");
+    scrText1.setAttribute("style", "color: white; position: fixed; top: 70px; left: 5px;");
     scrText1.innerText = "Superhex.io Scr1pt";
+    document.getElementById("homepage").appendChild(scrText1);
 
     var mainPanel = document.createElement("Div");
     mainPanel.setAttribute("style", "position: fixed; top: 130px; left: -4px; height:350px; width:170px;");
@@ -295,9 +294,4 @@ function createGui() {
     hotkeysPanel.appendChild(scrText2);
 }
 
-if (document.readyState == "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-}
-else {
-    init();
-}
+init();
