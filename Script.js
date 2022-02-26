@@ -28,10 +28,6 @@ var originalLoad = window.onload;
 window.onload = function () {
     if (originalLoad) originalLoad();
     window.mkGui();
-    var skinRightArrow = document.getElementById("skin-right-arrow"),
-        skinLeftArrow = document.getElementById("skin-left-arrow");
-    skinRightArrow.setAttribute("onclick", "skinChangePage(true, 1)");
-    skinLeftArrow.setAttribute("onclick", "skinChangePage(false, 1)");
     playBtn = document.getElementById("button-play");
     playAgBtn = document.getElementById("button-play-again");
     mMenuBtn = document.getElementById("button-main-menu");
@@ -51,39 +47,6 @@ window.onload = function () {
     mediumQB.setAttribute("class", mediumQB.className == "green" ? "scr1ptButton" : "scr1ptButton unselected");
     lowQB.setAttribute("onclick", "changeQuality(0.5);");
     lowQB.setAttribute("class", lowQB.className == "green" ? "scr1ptButton" : "scr1ptButton unselected");
-};
-
-window.skinChangePage = function (next, cantidad) {
-    if (!next) {
-        if (cantidad >= 1) superhex.previousSkins();
-        if (cantidad >= 2) superhex.previousSkins();
-        if (cantidad >= 3) superhex.previousSkins();
-        skinPag -= cantidad;
-    } else {
-        if (cantidad >= 1) superhex.nextSkins();
-        if (cantidad >= 2) superhex.nextSkins();
-        if (cantidad >= 3) superhex.nextSkins();
-        skinPag += cantidad;
-    }
-};
-
-window.changeSkin = function (ID) {
-    currSkin = Number(localStorage.getItem("selectedSkin"));
-    if (currSkin != ID) {
-        if (ID <= 3) {
-            if (skinPag == 2) window.skinChangePage(false, 1); else if (skinPag == 3) window.skinChangePage(false, 2);
-        } else if (ID <= 7) {
-            if (skinPag == 1) window.skinChangePage(true, 1); else if (skinPag == 3) window.skinChangePage(false, 1);
-        } else if (ID <= 9) {
-            if (skinPag == 2) window.skinChangePage(true, 1); else if (skinPag == 1) window.skinChangePage(true, 2);
-        } else {
-            alert("The skin doesn't exist.");
-            return;
-        }
-        superhex.selectSkin(ID);
-        currSkin = ID;
-        alert("Skin changed.");
-    } else alert("You are already using the skin");
 };
 
 window.changeQuality = function (qualityValue) {
@@ -164,50 +127,6 @@ window.changeQ = function () {
     }
 };
 
-window.changeS = function () {
-    var SkinPrompt = Number(window.prompt("Skin ID:"));
-    if (SkinPrompt == 0) return;
-    SkinPrompt--;
-    superhex.nextSkins();
-    superhex.previousSkins();
-    var ChickenS2, TweetS2, CowS2, RedBirdS2, ElephantS2;
-    if (localStorage.getItem("followClicked")) ChickenS2 = true;
-    if (localStorage.getItem("tweetClicked")) TweetS2 = true;
-    if (localStorage.getItem("likeClicked")) CowS2 = true;
-    if (localStorage.getItem("subscribeClicked")) RedBirdS2 = true;
-    if (localStorage.getItem("shareClicked")) ElephantS2 = true;
-    if (SkinPrompt.toString() == "NaN") alert("Invalid ID. Make sure to only use numbers."); else if (SkinPrompt => 0) {
-        if (SkinPrompt == 0) {
-            if (!ChickenS2) localStorage.setItem("followClicked", 1);
-            window.changeSkin(0);
-            if (!ChickenS2) localStorage.removeItem("followClicked");
-        } else if (SkinPrompt == 1) {
-            if (!TweetS2) localStorage.setItem("tweetClicked", 1);
-            window.changeSkin(SkinPrompt);
-            if (!TweetS2) localStorage.removeItem("tweetClicked");
-        } else if (SkinPrompt == 2) {
-            if (!CowS2) localStorage.setItem("likeClicked", 1);
-            window.changeSkin(SkinPrompt);
-            if (!CowS2) localStorage.removeItem("likeClicked");
-        } else if (SkinPrompt == 3) {
-            if (!RedBirdS2) localStorage.setItem("subscribeClicked", 1);
-            window.changeSkin(SkinPrompt);
-            if (!RedBirdS2) localStorage.removeItem("subscribeClicked");
-        } else if (SkinPrompt == 4) {
-            if (!ElephantS2) localStorage.setItem("shareClicked", 1);
-            window.changeSkin(SkinPrompt);
-            if (!ElephantS2) localStorage.removeItem("shareClicked");
-        } else {
-            try {
-                window.changeSkin(SkinPrompt);
-            } catch (err) {
-                console.error("Superhex.io Scr1pt - Change skin by ID Error (changeS()): " + err);
-                alert("An error has occurred. Make sure to insert a valid ID.");
-            }
-        }
-    }
-};
-
 window.unlockSK = function () {
     if (localStorage.getItem("shareClicked") && localStorage.getItem("subscribeClicked") && localStorage.getItem("likeClicked") && localStorage.getItem("tweetClicked") && localStorage.getItem("followClicked")) alert("You already unlocked the skins."); else {
         var ChickenS = true, TweetS = true, CowS = true, RedBirdS = true, ElephantS = true;
@@ -230,18 +149,6 @@ window.unlockSK = function () {
         if (RedBirdS) msg += "\nRed bird";
         if (ElephantS) msg += "\nElephant";
         alert(msg);
-    }
-};
-
-window.mkParty = function () {
-    var partyPrompt = window.prompt("Party ID:");
-    if (partyPrompt !== null && partyPrompt.length != 0) {
-        if (partyPrompt.length < 5) alert("The party ID must have more than 5 characters."); else if (partyPrompt.length > 6) alert("The party ID must have less than 6 characters."); else {
-            document.getElementById("create-party").style.display = "none";
-            document.getElementById("in-party").style.display = "block";
-            window.location.hash = partyPrompt;
-            document.getElementById("party-share-link").value = "http://" + window.location.hostname + (window.location.port ? ":" + window.location.port : "") + window.location.pathname + "#" + partyPrompt;
-        }
     }
 };
 
@@ -332,15 +239,6 @@ window.mkGui = function() {
     btnGF.setAttribute("onclick", "goGreasyFork();");
     mainPanel.appendChild(btnGF);
 
-    var btn3 = document.createElement("Button");
-    btn3.setAttribute("style", "position: relative; top: 30px; left: 15px; height: 25px; width: 140px;");
-    btn3.setAttribute("class", "scr1ptButton");
-    btn3.setAttribute("type", "button");
-    btn3.setAttribute("id", "btn3");
-    btn3.innerText = "Set Skin (ID)";
-    btn3.setAttribute("onclick", "changeS();");
-    mainPanel.appendChild(btn3);
-
     var btn6 = document.createElement("Button");
     btn6.setAttribute("style", "position: relative; top: 50px; left: 15px; height: 25px; width: 140px;");
     btn6.setAttribute("class", "scr1ptButton");
@@ -349,15 +247,6 @@ window.mkGui = function() {
     btn6.innerText = "Unlock skins";
     btn6.setAttribute("onclick", "unlockSK();");
     mainPanel.appendChild(btn6);
-
-    var btn8 = document.createElement("Button");
-    btn8.setAttribute("style", "position: relative; top: 60px; left: 15px; height: 25px; width: 140px;");
-    btn8.setAttribute("class", "scr1ptButton");
-    btn8.setAttribute("type", "button");
-    btn8.setAttribute("id", "btn8");
-    btn8.innerText = "Create Party";
-    btn8.setAttribute("onclick", "mkParty();");
-    mainPanel.appendChild(btn8);
 
     var versionText = document.createElement("h5");
     scrTextInfo.setAttribute("style", "color: rgba(255,255,255,0.6); position: absolute; bottom: -20px; right: 5px;");
