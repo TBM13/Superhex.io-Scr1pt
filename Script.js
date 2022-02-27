@@ -109,10 +109,6 @@ document.onkeyup = (e) => {
     }
 };
 
-function goGitHub() { window.open("https://github.com/TBM13/Superhex.io-Scr1pt"); }
-
-function goGreasyFork() { window.open("https://greasyfork.org/es/scripts/36071-superhex-io-scr1pt"); }
-
 function changeQ() {
     var QualityPrompt = Number(window.prompt("Insert value. Example:\n0.25: Very low\n0.5: Low\n0.75: Medium\n1: High\n1.5: Very high\n2: Ultra"));
     if (QualityPrompt > 2.7) alert("WARNING: Values higher than 2.7 can cause problems.");
@@ -190,89 +186,114 @@ function setZoomH() {
     }
 }
 
+class ModPanel {
+    constructor(parent) {
+        let mainPanel = document.createElement("div");
+
+        parent.appendChild(mainPanel);
+        this.mainPanel = mainPanel;
+        this.leftMargin = null;
+    }
+
+    createButton(text) {
+        let btn = document.createElement("button");
+        btn.innerText = text;
+        btn.style.height = "6%";
+        btn.style.width = "95%";
+        btn.style.marginTop = "5%";
+
+        this.mainPanel.appendChild(btn);
+
+        if (this.leftMargin === null) {
+            let left = btn.clientWidth * 5 / 100;
+            left /= 2;
+            this.leftMargin = left + "px";
+        }
+
+        btn.style.marginLeft = this.leftMargin;
+
+        return btn;
+    }
+
+    createCheckbox(text) {
+        let label = document.createElement("label");
+        label.innerText = text;
+        label.style.color = "white";
+        label.style.display = "inline-block";
+        label.style.marginTop = "5%";
+        label.style.fontSize = "13px";
+        label.style.fontWeight = "bold";
+
+        let check = document.createElement("input");
+        check.type = "checkbox";
+        check.style.position = "relative";
+
+        this.mainPanel.appendChild(label);
+        label.appendChild(check);
+        
+        check.style.left = "-" + (label.clientWidth) + "px";
+        label.style.marginLeft = (check.clientWidth + 10) + "px";
+
+        return [check, label];
+    }
+}
+
 function createGui() {
-    var scrText1 = document.createElement("h2");
-    scrText1.setAttribute("style", "color: white; position: fixed; top: 70px; left: 5px;");
-    scrText1.innerText = "Superhex.io Scr1pt";
-    document.getElementById("homepage").appendChild(scrText1);
+    let homepage = document.getElementById("homepage");
 
-    var mainPanel = document.createElement("Div");
-    mainPanel.setAttribute("style", "position: fixed; top: 130px; left: -4px; height:350px; width:170px;");
-    mainPanel.setAttribute("class", "scr1ptPanel");
-    mainPanel.setAttribute("id", "scr1ptPanel");
-    document.getElementById("homepage").appendChild(mainPanel);
+    let panel = new ModPanel(homepage);
+    let mainPanel = panel.mainPanel;
 
-    var btn = document.createElement("Button");
-    btn.setAttribute("style", "position: relative; top: 10px; left: 15px; height: 25px; width: 140px;");
-    btn.setAttribute("class", "scr1ptButton scr1ptButton-gold");
-    btn.setAttribute("type", "button");
-    btn.setAttribute("id", "btn");
-    btn.innerText = "GitHub";
-    btn.onclick = () => goGitHub();
-    mainPanel.appendChild(btn);
+    mainPanel.className = "scr1ptPanel";
+    mainPanel.style.position = "fixed";
+    mainPanel.style.top = "12%";
+    mainPanel.style.left = "-4px";
+    mainPanel.style.width = "20%";
+    mainPanel.style.maxWidth = "200px";
+    mainPanel.style.height = "60%";
 
-    var btn2 = document.createElement("Button");
-    btn2.setAttribute("class", "scr1ptButton unselected");
-    btn2.setAttribute("type", "button");
-    btn2.setAttribute("id", "btn2");
-    btn2.innerText = "Custom Quality";
-    btn2.onclick = () => changeQ();
-    document.getElementById("button-quality-high").parentElement.appendChild(btn2);
+    let title = document.createElement("h3");
+    title.style.color = "white";
+    title.style.position = "fixed";
+    title.style.top = "6%";
+    title.style.left = "5px";
+    title.innerText = "Superhex.io Scr1pt";
+    homepage.appendChild(title);
 
-    var btnGF = document.createElement("Button");
-    btnGF.setAttribute("style", "position: relative; top: 20px; left: 15px; height: 25px; width: 140px;");
-    btnGF.setAttribute("class", "scr1ptButton scr1ptButton-gold");
-    btnGF.setAttribute("type", "button");
-    btnGF.setAttribute("id", "btnGF");
-    btnGF.innerText = "Greasy Fork";
-    btnGF.onclick = () => goGreasyFork();
-    mainPanel.appendChild(btnGF);
+    let githubButton = panel.createButton("GitHub");
+    githubButton.className = "scr1ptButton scr1ptButton-gold";
+    githubButton.onclick = () => window.open("https://github.com/TBM13/Superhex.io-Scr1pt");
 
-    var btn6 = document.createElement("Button");
-    btn6.setAttribute("style", "position: relative; top: 50px; left: 15px; height: 25px; width: 140px;");
-    btn6.setAttribute("class", "scr1ptButton");
-    btn6.setAttribute("type", "button");
-    btn6.setAttribute("id", "btn6");
-    btn6.innerText = "Unlock skins";
-    btn6.onclick = () => unlockSK();
-    mainPanel.appendChild(btn6);
+    let greasyForkButton = panel.createButton("Greasy Fork");
+    greasyForkButton.className = "scr1ptButton scr1ptButton-gold";
+    greasyForkButton.onclick = () => window.open("https://greasyfork.org/es/scripts/36071-superhex-io-scr1pt");
 
-    var versionText = document.createElement("h5");
+    let unlockSkinsButton = panel.createButton("Unlock skins");
+    unlockSkinsButton.className = "scr1ptButton";
+    unlockSkinsButton.onclick = () => unlockSK();
+
+    let customQualityButton = document.createElement("Button");
+    customQualityButton.setAttribute("class", "scr1ptButton unselected");
+    customQualityButton.setAttribute("type", "button");
+    customQualityButton.setAttribute("id", "btn2");
+    customQualityButton.innerText = "Custom Quality";
+    customQualityButton.onclick = () => changeQ();
+    document.getElementById("button-quality-high").parentElement.appendChild(customQualityButton);
+
+    let versionText = document.createElement("h5");
     versionText.setAttribute("style", "color: rgba(255,255,255,0.6); position: absolute; bottom: -20px; right: 5px;");
     versionText.innerText = "v1.9.2";
     mainPanel.appendChild(versionText);
 
-    var Check1 = document.createElement("INPUT");
-    Check1.setAttribute("type", "checkbox");
-    Check1.setAttribute("id", "checkAdBlock");
-    Check1.setAttribute("style", "position: absolute; top: 260px; left: 15px;");
-    Check1.onclick = () => removeAds(true);
-    mainPanel.appendChild(Check1);
+    let removeAdsCheckbox = panel.createCheckbox("Remove ads")[0]
+    removeAdsCheckbox.onclick = () => removeAds(true);
+    removeAdsCheckbox.checked = AdsTBM;
 
-    Check1.checked = AdsTBM;
+    let zoomHackCheckbox = panel.createCheckbox("Zoom Hack")[0];
+    zoomHackCheckbox.onclick = () => zoomH(true);
+    zoomHackCheckbox.checked = zoomHack == "True";
 
-    var check1Text = document.createElement("h5");
-    check1Text.setAttribute("style", "color: white; position: absolute; top: 240px; left: 35px;");
-    check1Text.setAttribute("id", "check1Text");
-    check1Text.innerText = "Remove ads";
-    mainPanel.appendChild(check1Text);
-
-    var Check2 = document.createElement("INPUT");
-    Check2.setAttribute("type", "checkbox");
-    Check2.setAttribute("id", "checkZoom");
-    Check2.setAttribute("style", "position: absolute; top: 285px; left: 15px;");
-    Check2.onclick = () => zoomH(true);
-    mainPanel.appendChild(Check2);
-
-    Check2.checked = zoomHack == "True";
-
-    var check2Text = document.createElement("h5");
-    check2Text.setAttribute("style", "color: white; position: absolute; top: 265px; left: 35px;");
-    check2Text.setAttribute("id", "check2Text");
-    check2Text.innerText = "Zoom Hack";
-    mainPanel.appendChild(check2Text);
-
-    var btnZHS = document.createElement("Button");
+    let btnZHS = document.createElement("Button");
     btnZHS.setAttribute("style", "position: absolute; top: 286px; left: 130px; height: 16px; width: 16px;");
     btnZHS.setAttribute("class", "scr1ptButton");
     btnZHS.innerHTML = "<img src='https://lh3.googleusercontent.com/Abm4DjvPOP55GK2MCe9gYh8M1ZJa7ws71oXcW2q6Rl1pQXIQ_bUcVxbN5vZ8_6pmP248O-uQEN2fUxq-xzFlzefdXyEBakvzEgGKzIwSkcdSBHdM2PwtgpgXbMvbP_N7FSI4BYIujg=s16-no' style='position: absolute; left: 0px; top: 0px;'/>";
@@ -281,13 +302,13 @@ function createGui() {
     btnZHS.onclick = () => setZoomH();
     mainPanel.appendChild(btnZHS);
 
-    var hotkeysPanel = document.createElement("Div");
+    let hotkeysPanel = document.createElement("Div");
     hotkeysPanel.setAttribute("style", "position: fixed; bottom: -4px; right: -4px; height:150px; width:300px;");
     hotkeysPanel.setAttribute("class", "scr1ptPanel");
     hotkeysPanel.setAttribute("id", "scr1ptPanel2");
     document.getElementById("homepage").appendChild(hotkeysPanel);
 
-    var scrText2 = document.createElement("h4");
+    let scrText2 = document.createElement("h4");
     scrText2.setAttribute("style", "color: white; position: relative; left: 10px;");
     scrText2.setAttribute("id", "scrText2");
     scrText2.innerText = "Hotkeys:\n\n1 = Hide/show Leaderboard.\n0 = Hide/show UI.\n2 = Hide/show FPS and connection info.";
