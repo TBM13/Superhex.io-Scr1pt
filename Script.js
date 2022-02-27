@@ -252,18 +252,13 @@ function createGui() {
     removeAdsCheckbox.onclick = () => toggleRemoveAds(!removeAdsCheckbox.checked);
     removeAdsCheckbox.checked = AdsTBM;
 
-    let zoomHackCheckbox = panel.createCheckbox("Zoom Hack")[0];
-    zoomHackCheckbox.onclick = () => toggleZoomHack(zoomHackCheckbox.checked);
-    zoomHackCheckbox.checked = zoomHack == "True";
+    let zoomHackCheckbox = panel.createCheckboxAndButton("Zoom Hack");
+    zoomHackCheckbox[0].onclick = () => toggleZoomHack(zoomHackCheckbox.checked);
+    zoomHackCheckbox[0].checked = zoomHack == "True";
 
-    let btnZHS = document.createElement("Button");
-    btnZHS.setAttribute("style", "position: absolute; top: 286px; left: 130px; height: 16px; width: 16px;");
-    btnZHS.setAttribute("class", "scr1ptButton");
-    btnZHS.innerHTML = "<img src='https://lh3.googleusercontent.com/Abm4DjvPOP55GK2MCe9gYh8M1ZJa7ws71oXcW2q6Rl1pQXIQ_bUcVxbN5vZ8_6pmP248O-uQEN2fUxq-xzFlzefdXyEBakvzEgGKzIwSkcdSBHdM2PwtgpgXbMvbP_N7FSI4BYIujg=s16-no' style='position: absolute; left: 0px; top: 0px;'/>";
-    btnZHS.setAttribute("type", "button");
-    btnZHS.setAttribute("id", "btnZHS");
-    btnZHS.onclick = () => setZoomHackValue();
-    mainPanel.appendChild(btnZHS);
+    zoomHackCheckbox[2].className = "scr1ptButton";
+    zoomHackCheckbox[2].innerHTML = "<img src='https://lh3.googleusercontent.com/Abm4DjvPOP55GK2MCe9gYh8M1ZJa7ws71oXcW2q6Rl1pQXIQ_bUcVxbN5vZ8_6pmP248O-uQEN2fUxq-xzFlzefdXyEBakvzEgGKzIwSkcdSBHdM2PwtgpgXbMvbP_N7FSI4BYIujg=s16-no' style='position: relative; left: -6px; top: -1px;'/>";
+    zoomHackCheckbox[2].onclick = () => setZoomHackValue();
 
     let hotkeysPanel = document.createElement("Div");
     hotkeysPanel.setAttribute("style", "position: fixed; bottom: -4px; right: -4px; height:150px; width:300px;");
@@ -327,6 +322,20 @@ class ModPanel {
         label.style.marginLeft = (check.clientWidth + 10) + "px";
 
         return [check, label];
+    }
+
+    createCheckboxAndButton(text) {
+        let checkbox = this.createCheckbox(text);
+
+        let btn = document.createElement("Button");
+        btn.style.height = "16px";
+        btn.style.width = "16px";
+        btn.style.position = "relative";
+        btn.style.left = "-12px";
+        btn.style.top = "4px";
+        checkbox[1].appendChild(btn);
+
+        return [checkbox[0], checkbox[1], btn];
     }
 }
 
