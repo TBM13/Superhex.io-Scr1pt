@@ -215,13 +215,9 @@ function createGui() {
     mainPanel.style.maxWidth = "200px";
     mainPanel.style.height = "60%";
 
-    let title = document.createElement("h3");
-    title.style.color = "white";
-    title.style.position = "fixed";
-    title.style.top = "6%";
-    title.style.left = "5px";
-    title.innerText = "Superhex.io Scr1pt";
-    homepage.appendChild(title);
+    let title = panel.createLabel("Superhex.io Scr1pt");
+    title.style.marginLeft = mainPanel.style.left;
+    title.style.textAlign = "center";
 
     let githubButton = panel.createButton("GitHub");
     githubButton.className = "scr1ptButton scr1ptButton-gold";
@@ -280,6 +276,20 @@ class ModPanel {
         parent.appendChild(mainPanel);
         this.mainPanel = mainPanel;
         this.leftMargin = null;
+    }
+
+    createLabel(text) {
+        let label = document.createElement("label");
+        label.innerText = text;
+        label.style.width = "100%";
+        label.style.color = "white";
+        label.style.display = "inline-block";
+        label.style.marginTop = "5%";
+        label.style.fontWeight = "bold";
+        label.style.marginLeft = this.leftMargin ?? "5px";
+
+        this.mainPanel.appendChild(label);
+        return label;
     }
 
     createButton(text) {
