@@ -256,17 +256,18 @@ function createGui() {
     zoomHackCheckbox[2].innerHTML = "<img src='https://lh3.googleusercontent.com/Abm4DjvPOP55GK2MCe9gYh8M1ZJa7ws71oXcW2q6Rl1pQXIQ_bUcVxbN5vZ8_6pmP248O-uQEN2fUxq-xzFlzefdXyEBakvzEgGKzIwSkcdSBHdM2PwtgpgXbMvbP_N7FSI4BYIujg=s16-no' style='position: relative; left: -6px; top: -1px;'/>";
     zoomHackCheckbox[2].onclick = () => setZoomHackValue();
 
-    let hotkeysPanel = document.createElement("Div");
-    hotkeysPanel.setAttribute("style", "position: fixed; bottom: -4px; right: -4px; height:150px; width:300px;");
-    hotkeysPanel.setAttribute("class", "scr1ptPanel");
-    hotkeysPanel.setAttribute("id", "scr1ptPanel2");
-    document.getElementById("homepage").appendChild(hotkeysPanel);
+    let hotkeysPanel = new ModPanel(homepage);
+    hotkeysPanel.mainPanel.className = "scr1ptPanel";
+    hotkeysPanel.mainPanel.style.position = "fixed";
+    hotkeysPanel.mainPanel.style.bottom = "-4px";
+    hotkeysPanel.mainPanel.style.right = "-4px";
+    hotkeysPanel.mainPanel.style.height = "30%";
+    hotkeysPanel.mainPanel.style.width = "30%";
+    hotkeysPanel.mainPanel.style.maxHeight = "150px";
+    hotkeysPanel.mainPanel.style.maxWidth = "300px";
 
-    let scrText2 = document.createElement("h4");
-    scrText2.setAttribute("style", "color: white; position: relative; left: 10px;");
-    scrText2.setAttribute("id", "scrText2");
-    scrText2.innerText = "Hotkeys:\n\n1 = Hide/show Leaderboard.\n0 = Hide/show UI.\n2 = Hide/show FPS and connection info.";
-    hotkeysPanel.appendChild(scrText2);
+    let hotkeysLabel = hotkeysPanel.createLabel("Hotkeys:\n\n1 = Hide/show Leaderboard.\n0 = Hide/show UI.\n2 = Hide/show FPS and connection info.");
+    hotkeysLabel.style.marginLeft = "10px";
 }
 
 class ModPanel {
