@@ -9,22 +9,26 @@
 // @author       TBM13
 // @match        *://superhex.io/*
 // @match        www.superhex.io/*
-// @run-at       document-end
+// @run-at       document-start
 // @grant        none
 // ==/UserScript==
 
 var style = document.createElement("style"),
     AdsTBM = localStorage.getItem("AdsTBM"), currQuality = localStorage.getItem("quality"), zoomHack = localStorage.getItem("zoomTBM"), zoomValue = localStorage.getItem("zoomValTBM"),
-    superhex = window.superhex,
+    superhex,
     stopRemoveAdsService = false, adElem,
     customQualityButton,
-    originalMathMax = Math.max, originalOnMouseWheel = window.onmousewheel,
+    originalMathMax, originalOnMouseWheel,
     leaderboard, minimap, friendsScores, score, fps;
 
 style.innerHTML = '.scr1ptPanel {background:rgba(0,60,0,0.5); border-style: solid; border-width: 3px; border-color: rgb(60,185,60,0.5); border-radius: 5px;} .scr1ptButton {line-height: 1; outline: none; color: white; background-color: #5CB85C; border-radius: 4px; border-width: 0px; transition: 0.2s;} .scr1ptButton:hover {background-color: #5ed15e; cursor: pointer;} .scr1ptButton:active {background-color: #4e9c4e;} .scr1ptButton.unselected {opacity: 0.5;} .scr1ptButton .spinner {display: none; vertical-align: middle;} .scr1ptButton.button-loading {background-color: #7D7D7D; color: white;} .scr1ptButton.button-loading .spinner {display: inline-block;} .scr1ptButton-grey {color: black; background-color: #f5f5f5;} .scr1ptButton-grey:hover {background-color: white; color: #5e5e5e;} .scr1ptButton-grey:active {background-color: #cccccc; color: #5e5e5e;} .scr1ptButton-gold {background-color: #c9c818;} .scr1ptButton-gold:hover {background-color: #d9d71a;} .scr1ptButton-gold:active {background-color: #aba913;}';
-document.getElementsByTagName("head")[0].appendChild(style);
 
 function init() {
+    document.getElementsByTagName("head")[0].appendChild(style);
+    superhex = window.superhex;
+    originalMathMax = Math.max;
+    originalOnMouseWheel = window.onmousewheel;
+
     createGui();
 
     adElem = document.getElementById("TKS_superhex-io_300x250");
@@ -360,4 +364,9 @@ class ModPanel {
     }
 }
 
-init();
+if (document.readyState == "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+}
+else {
+    init();
+}
