@@ -111,6 +111,8 @@ function removeAdsService(timeout = 50) {
 }
 
 function removeAdElement(elem) {
+    if (elem == null) return;
+
     elem.innerHTML = "";
     elem.style.display = "none";
 }
