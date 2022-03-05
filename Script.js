@@ -215,6 +215,34 @@ function setZoomHackValue() {
     }
 }
 
+function initObserver() {
+    while (document.documentElement == null) {
+        setTimeout(initObserver, 50);
+        return;
+    }
+
+    new MutationObserver(mutations => {
+        mutations.forEach(({addedNodes}) => {
+            addedNodes.forEach(node => {
+                if (node?.src?.includes('game')) console.info(node.src);
+                if (node.src) {
+                    if (AdsTBM) {
+                        // Prevent ads-related scripts from loading
+                        if (node.src.includes('criteo') || node.src.includes('adin') || node.src.includes('analytics')) {
+                            console.debug('Removing ' + node.src)
+                            node.type = 'javascript/blocked'
+                            node.parentElement.removeChild(node)
+                        }
+                    }
+                }
+            })
+        })
+    }).observe(document.documentElement, {
+        childList: true,
+        subtree: true
+    });
+}
+
 function createGui() {
     let homepage = document.getElementById("homepage");
 
@@ -364,9 +392,11 @@ class ModPanel {
     }
 }
 
+initObserver();
 if (document.readyState == "loading") {
     document.addEventListener("DOMContentLoaded", init);
 }
 else {
+    console.error("Late init! Some features may not work!");
     init();
 }
