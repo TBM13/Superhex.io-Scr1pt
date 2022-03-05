@@ -101,6 +101,7 @@ function removeAdsService(timeout = 50) {
         removeAdElement(adElem);
         removeAdElement(document.getElementById("respawn-ad"));
         removeAdElement(document.getElementsByClassName("curse-ad")[0]);
+        removeAdElement(document.getElementById("780560"));
 
         timeout = 50;
     }
