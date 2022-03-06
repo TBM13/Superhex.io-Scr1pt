@@ -391,6 +391,12 @@ function onKeyUp(e) {
     if (key == '2') {
         fps.style.display = fps.style.display == "block" ? "none" : "block";
     }
+    else if (key == ',') {
+        changeZoom(false);
+    }
+    else if (key == '.') {
+        changeZoom(true);
+    }
 }
 
 function unlockSkins() {
@@ -434,32 +440,26 @@ function toggleZoomHack(enable) {
             if (!e) e = window.event;
             if (e.wheelDelta) delta = e.wheelDelta / 60; else if (e.detail) delta = -e.detail / 2;
 
-            let value = cfg_zoomValue.read();
-            if (delta !== null && delta > 0) {
-               if (value < 60) value += value < 16 ? 1 : 2;
-            } else {
-               if (value > 5) value -= value < 16 ? 1 : 2;
-            }
-
-            if (value != cfg_zoomValue.read()) {
-                window.dispatchEvent(new Event('resize'));
-                cfg_zoomValue.write(value);
-            }
+            changeZoom(delta != null && delta > 0);
         };
     }
 }
 
-function setZoomHackValue() {
-    let zoomHPrompt = window.prompt("Insert zoom value.\nBy default is 13 (higher value = more zoom)\nNote: You can also use the mouse wheel to zoom in/out.");
+function changeZoom(zoomIn) {
+    let value = cfg_zoomValue.read();
+    let increaser = 2;
+    if (value < 16) increaser = 1;
+    else if (value > 30) increaser = 4;
 
-    if (zoomHPrompt !== null && zoomHPrompt.length != 0) {
-        zoomHPrompt = Number(zoomHPrompt);
-        if (zoomHPrompt > 60) alert("Value can't be greater than 60."); 
-        else if (zoomHPrompt < 5) alert("Value can't be less than 5."); 
-        else if (zoomHPrompt.toString() == "NaN") alert("Invalid value. Make sure to only use numbers."); 
-        else {
-            cfg_zoomValue.write(zoomHPrompt);
-        }
+    if (zoomIn) value += increaser;
+    else value -= increaser;
+
+    if (value > 60) value = 60;
+    if (value < 3) value = 3;
+
+    if (value != cfg_zoomValue.read()) {
+        cfg_zoomValue.write(value);
+        window.dispatchEvent(new Event('resize'));
     }
 }
 
@@ -512,25 +512,27 @@ function createGui() {
     removeAdsCheckbox.onclick = () => toggleRemoveAds(!removeAdsCheckbox.checked);
     removeAdsCheckbox.checked = cfg_removeAds.read();
 
-    let zoomHackCheckbox = panel.createCheckboxAndButton("Zoom Hack");
-    zoomHackCheckbox[0].onclick = () => toggleZoomHack(zoomHackCheckbox[0].checked);
-    zoomHackCheckbox[0].checked = cfg_zoomHack.read();
-
-    zoomHackCheckbox[2].className = "scr1ptButton";
-    zoomHackCheckbox[2].innerHTML = "<img src='https://lh3.googleusercontent.com/Abm4DjvPOP55GK2MCe9gYh8M1ZJa7ws71oXcW2q6Rl1pQXIQ_bUcVxbN5vZ8_6pmP248O-uQEN2fUxq-xzFlzefdXyEBakvzEgGKzIwSkcdSBHdM2PwtgpgXbMvbP_N7FSI4BYIujg=s16-no' style='position: relative; left: -6px; top: -1px;'/>";
-    zoomHackCheckbox[2].onclick = () => setZoomHackValue();
+    let zoomHackCheckbox = panel.createCheckbox("Zoom Hack")[0];
+    zoomHackCheckbox.onclick = () => toggleZoomHack(zoomHackCheckbox.checked);
+    zoomHackCheckbox.checked = cfg_zoomHack.read();
 
     let hotkeysPanel = new ModPanel(homepage);
     hotkeysPanel.mainPanel.className = "scr1ptPanel";
     hotkeysPanel.mainPanel.style.position = "fixed";
     hotkeysPanel.mainPanel.style.bottom = "-4px";
     hotkeysPanel.mainPanel.style.right = "-4px";
-    hotkeysPanel.mainPanel.style.height = "30%";
+    hotkeysPanel.mainPanel.style.height = "40%";
     hotkeysPanel.mainPanel.style.width = "30%";
-    hotkeysPanel.mainPanel.style.maxHeight = "150px";
-    hotkeysPanel.mainPanel.style.maxWidth = "300px";
+    hotkeysPanel.mainPanel.style.maxHeight = "200px";
+    hotkeysPanel.mainPanel.style.maxWidth = "350px";
 
-    let hotkeysLabel = hotkeysPanel.createLabel("Hotkeys:\n\n1 = Hide/show Leaderboard.\n0 = Hide/show UI.\n2 = Hide/show FPS and connection info.");
+    let hotkeysLabel = hotkeysPanel.createLabel("Hotkeys:\n\n" +
+                                                "1 = Hide/show Leaderboard\n" +
+                                                "0 = Hide/show UI\n" +
+                                                "2 = Hide/show FPS and connection info\n" +
+                                                ", = Zoom Out\n" +
+                                                ". = Zoom In\n" +
+                                                "Mouse wheel = Zoom in/out");
     hotkeysLabel.style.marginLeft = "10px";
 
     let serverListSelect = document.createElement("select");
@@ -541,7 +543,7 @@ function createGui() {
 
     let option = document.createElement("option");
     option.text = "Loading servers...";
-    if (!injected) option.text = "Feature unavailable";
+    if (!injected) option.text = "Feature unavailable. Refresh the page";
     serverListSelect.appendChild(option);
 }
 
