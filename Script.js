@@ -147,7 +147,7 @@ style.innerHTML = '.scr1ptPanel {background:rgba(0,60,0,0.5); border-style: soli
 var superhex, injected,
     originalMathMax, originalOnMouseWheel,
     stopRemoveAdsService = false, adElem,
-    serverListSelect, customQualityButton,
+    customQualityButton,
     leaderboard, minimap, friendsScores, score, fps;
 
 function initObserver() {
@@ -155,6 +155,10 @@ function initObserver() {
         setTimeout(initObserver, 50);
         return;
     }
+
+    // This is required to prevent the browser from using the cached script
+    let head = document.getElementsByTagName('head')[0];
+    head.innerHTML = head.innerHTML.replace("game.min.js", "game.min.js?version=1")
 
     console.debug("Initializing observer...");
 
@@ -191,11 +195,69 @@ function initObserver() {
 
 function injectGame(script) {
     script = script.replace("var superhex=function()", "window.superhex=function()");
+    let originalScript = script;
+
+    // Server list
+    script = script.replace('console.log("kept zone ping",e.z,wt[e.z])', 
+                            'console.log("kept zone ping",e.z,wt[e.z],", reporting to Mod"),window.addServer(e.z,wt[e.z])')
+                    .replace('.open("GET",MM_URL+"?zone="+(n||"")', '.open("GET",MM_URL+"?zone="+(window.preferredServer||n||"")');
 
     console.debug("Loading modified Game...")
-    Function(script)();
-    injected = true;
+
+    try {
+        Function(script)();
+        injected = true;
+    }
+    catch (e) {
+        console.error("-----------------------------------------------------------------------------------------------------");
+        console.error("Loading of modified game failed. Attempting to load original game. Some features will be unavailable!")
+        console.error("-----------------------------------------------------------------------------------------------------");
+        console.trace(e);
+
+        console.debug("Loading Original Game...")
+        Function(originalScript)();
+    }
+    
     superhex = window.superhex;
+}
+
+window.addServer = (zone, ping) => {
+    let select = document.getElementById("serverListSelect");
+
+    if (select.children[0].text.toLowerCase().includes("loading")){
+        select.children[0].text = "Auto (Default)";
+        if (window.preferredServer != null) select.children[0].text = window.preferredServer + " (?)";
+    }
+
+    let previousSelectedI = select.selectedIndex;
+
+    let option = document.createElement("option");
+    option.text = zone + " (" + ping + " ms)";
+    select.appendChild(option);  
+
+    if (window.preferredServer != null) {
+        if (window.preferredServer == zone) {
+            select.children[0].text = "Auto (Default)";
+            select.selectedIndex = select.children.length - 1;
+        }
+        else {
+            select.selectedIndex = previousSelectedI;
+        }
+    }
+};
+
+function changePreferredServer(item) {
+    let value = item.text.toUpperCase();
+
+    if (value.includes("AUTO")) {
+        window.preferredServer = null;
+        cfg_preferredServer.write("");
+        return;
+    }
+
+    let zone = value.substr(0, value.indexOf(" ("));
+    window.preferredServer = zone;
+    cfg_preferredServer.write(zone);
 }
 
 function init() {
@@ -220,6 +282,7 @@ function init() {
     adElem = document.getElementById("TKS_superhex-io_300x250");
     if (cfg_removeAds.read()) removeAdsService();
     if (cfg_zoomHack.read()) toggleZoomHack(true);
+    if (cfg_preferredServer.read().length > 0) window.preferredServer = cfg_preferredServer.read();
 
     changeQuality(cfg_quality.read());
     document.getElementById("button-quality-high").onclick = () => changeQuality(1);
@@ -395,7 +458,6 @@ function setZoomHackValue() {
         else if (zoomHPrompt < 5) alert("Value can't be less than 5."); 
         else if (zoomHPrompt.toString() == "NaN") alert("Invalid value. Make sure to only use numbers."); 
         else {
-            wzoomValue = zoomHPrompt;
             cfg_zoomValue.write(zoomHPrompt);
         }
     }
@@ -471,9 +533,16 @@ function createGui() {
     let hotkeysLabel = hotkeysPanel.createLabel("Hotkeys:\n\n1 = Hide/show Leaderboard.\n0 = Hide/show UI.\n2 = Hide/show FPS and connection info.");
     hotkeysLabel.style.marginLeft = "10px";
 
-    serverListSelect = document.createElement("select");
+    let serverListSelect = document.createElement("select");
     serverListSelect.style.width = "100%";
+    serverListSelect.id = "serverListSelect";
     document.getElementById("button-play").parentElement.appendChild(serverListSelect);
+    serverListSelect.onchange = () => changePreferredServer(serverListSelect.children[serverListSelect.selectedIndex]);
+
+    let option = document.createElement("option");
+    option.text = "Loading servers...";
+    if (!injected) option.text = "Feature unavailable";
+    serverListSelect.appendChild(option);
 }
 
 initObserver();
