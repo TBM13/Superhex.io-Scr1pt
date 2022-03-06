@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Superhex.io Scr1pt - Zoom Hack and more
 // @namespace    Superhex.io Scr1pt
-// @version      1.9.2
+// @version      2.0.0
 // @license      MIT
 // @homepageURL  https://github.com/TBM13/Superhex.io-Scr1pt
 // @icon         http://superhex.io/img/fav_icon_1.png
@@ -505,7 +505,7 @@ function createGui() {
 
     let versionText = document.createElement("h5");
     versionText.setAttribute("style", "color: rgba(255,255,255,0.6); position: absolute; bottom: -20px; right: 5px;");
-    versionText.innerText = "v1.9.2";
+    versionText.innerText = "v2.0.0";
     mainPanel.appendChild(versionText);
 
     let removeAdsCheckbox = panel.createCheckbox("Remove ads")[0]
