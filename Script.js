@@ -138,22 +138,77 @@ class NumberSetting extends Setting {
 var cfg_removeAds = new BoolSetting("mod_removeAds", false),
     cfg_quality = new NumberSetting("quality", 0.75), 
     cfg_zoomHack = new BoolSetting("mod_zoomHack", true), 
-    cfg_zoomValue = new NumberSetting("mod_zoomValue", 13);
+    cfg_zoomValue = new NumberSetting("mod_zoomValue", 13),
+    cfg_preferredServer = new Setting("mod_preferredServer", "");
 
 var style = document.createElement("style");
 style.innerHTML = '.scr1ptPanel {background:rgba(0,60,0,0.5); border-style: solid; border-width: 3px; border-color: rgb(60,185,60,0.5); border-radius: 5px;} .scr1ptButton {line-height: 1; outline: none; color: white; background-color: #5CB85C; border-radius: 4px; border-width: 0px; transition: 0.2s;} .scr1ptButton:hover {background-color: #5ed15e; cursor: pointer;} .scr1ptButton:active {background-color: #4e9c4e;} .scr1ptButton.unselected {opacity: 0.5;} .scr1ptButton .spinner {display: none; vertical-align: middle;} .scr1ptButton.button-loading {background-color: #7D7D7D; color: white;} .scr1ptButton.button-loading .spinner {display: inline-block;} .scr1ptButton-grey {color: black; background-color: #f5f5f5;} .scr1ptButton-grey:hover {background-color: white; color: #5e5e5e;} .scr1ptButton-grey:active {background-color: #cccccc; color: #5e5e5e;} .scr1ptButton-gold {background-color: #c9c818;} .scr1ptButton-gold:hover {background-color: #d9d71a;} .scr1ptButton-gold:active {background-color: #aba913;}';
 
-var superhex,
+var superhex, injected,
     originalMathMax, originalOnMouseWheel,
     stopRemoveAdsService = false, adElem,
-    customQualityButton,
+    serverListSelect, customQualityButton,
     leaderboard, minimap, friendsScores, score, fps;
+
+function initObserver() {
+    while (document.documentElement == null) {
+        setTimeout(initObserver, 50);
+        return;
+    }
+
+    console.debug("Initializing observer...");
+
+    new MutationObserver(mutations => {
+        mutations.forEach(({addedNodes}) => {
+            addedNodes.forEach(node => {
+                if (node.src) {
+                    if (cfg_removeAds.read()) {
+                        // Prevent ads-related scripts from loading
+                        if (node.src.includes('criteo') || node.src.includes('adin') || node.src.includes('analytics')) {
+                            console.info('Blocking ad provider', node.src)
+                            node.type = 'javascript/blocked'
+                            node.parentElement.removeChild(node)
+                        }
+                    }
+
+                    if (node.src.includes('game.min.js')) {
+                        console.debug("Intercepting " + node.src);
+                        node.type = 'javascript/blocked'
+                        node.parentElement.removeChild(node)
+
+                        fetch(node.src)
+                            .then(res => res.text())
+                            .then(script => {injectGame(script)})
+                    }
+                }
+            })
+        })
+    }).observe(document.documentElement, {
+        childList: true,
+        subtree: true
+    });
+}
+
+function injectGame(script) {
+    script = script.replace("var superhex=function()", "window.superhex=function()");
+
+    console.debug("Loading modified Game...")
+    Function(script)();
+    injected = true;
+    superhex = window.superhex;
+}
 
 function init() {
     superhex = window.superhex;
     if (superhex == null) {
         setTimeout(init, 100);
         return;
+    }
+
+    console.info("Initializing Mod...");
+
+    if (!injected) {
+        console.error("Mod is loading but game wasn't injected!")
     }
 
     document.getElementsByTagName("head")[0].appendChild(style);
@@ -164,7 +219,6 @@ function init() {
 
     adElem = document.getElementById("TKS_superhex-io_300x250");
     if (cfg_removeAds.read()) removeAdsService();
-
     if (cfg_zoomHack.read()) toggleZoomHack(true);
 
     changeQuality(cfg_quality.read());
@@ -179,6 +233,8 @@ function init() {
     fps = document.getElementById("fps");
     fps.style.color = 'white';
     window.addEventListener("keyup", onKeyUp);
+
+    console.info("Mod initialized");
 }
 
 function changeQuality(quality) {
@@ -217,14 +273,14 @@ function toggleRemoveAds(restoreAds) {
         return;
     }
     
-    cfg_removeAds.write(true);;
+    cfg_removeAds.write(true);
     removeAdsService();
 }
 
 function removeAdsService(timeout = 50) {
     if (adElem.innerHTML != "")
     {
-        console.log("Removing ads");
+        console.debug("Removing ads...");
         superhex.clickPlay = superhex.aipComplete;
         superhex.clickPlayAgain = superhex.aipComplete;
         removeAdElement(adElem);
@@ -345,49 +401,9 @@ function setZoomHackValue() {
     }
 }
 
-function initObserver() {
-    while (document.documentElement == null) {
-        setTimeout(initObserver, 50);
-        return;
-    }
-
-    new MutationObserver(mutations => {
-        mutations.forEach(({addedNodes}) => {
-            addedNodes.forEach(node => {
-                if (node.src) {
-                    if (cfg_removeAds.read()) {
-                        // Prevent ads-related scripts from loading
-                        if (node.src.includes('criteo') || node.src.includes('adin') || node.src.includes('analytics')) {
-                            console.debug('Removing ' + node.src)
-                            node.type = 'javascript/blocked'
-                            node.parentElement.removeChild(node)
-                        }
-                    }
-
-                    if (node.src.includes('game.min.js')) {
-                        console.debug("Injecting " + node.src);
-                        node.type = 'javascript/blocked'
-                        node.parentElement.removeChild(node)
-
-                        fetch(node.src)
-                            .then(res => res.text())
-                            .then(script => {
-                                script = script.replace("var superhex=function()", "window.superhex=function()");
-                                
-                                Function(script)();
-                                superhex = window.superhex;
-                            })
-                    }
-                }
-            })
-        })
-    }).observe(document.documentElement, {
-        childList: true,
-        subtree: true
-    });
-}
-
 function createGui() {
+    console.debug("Creating Mod UI...");
+
     let homepage = document.getElementById("homepage");
 
     let panel = new ModPanel(homepage);
@@ -454,6 +470,10 @@ function createGui() {
 
     let hotkeysLabel = hotkeysPanel.createLabel("Hotkeys:\n\n1 = Hide/show Leaderboard.\n0 = Hide/show UI.\n2 = Hide/show FPS and connection info.");
     hotkeysLabel.style.marginLeft = "10px";
+
+    serverListSelect = document.createElement("select");
+    serverListSelect.style.width = "100%";
+    document.getElementById("button-play").parentElement.appendChild(serverListSelect);
 }
 
 initObserver();
