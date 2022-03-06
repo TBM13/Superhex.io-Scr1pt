@@ -13,15 +13,141 @@
 // @grant        none
 // ==/UserScript==
 
-var style = document.createElement("style"),
-    AdsTBM = localStorage.getItem("AdsTBM"), currQuality = localStorage.getItem("quality"), zoomHack = localStorage.getItem("zoomTBM"), zoomValue = localStorage.getItem("zoomValTBM"),
-    superhex,
+class ModPanel {
+    constructor(parent) {
+        let mainPanel = document.createElement("div");
+
+        parent.appendChild(mainPanel);
+        this.mainPanel = mainPanel;
+        this.leftMargin = null;
+    }
+
+    createLabel(text) {
+        let label = document.createElement("label");
+        label.innerText = text;
+        label.style.width = "100%";
+        label.style.color = "white";
+        label.style.display = "inline-block";
+        label.style.marginTop = "5%";
+        label.style.fontWeight = "bold";
+        label.style.marginLeft = this.leftMargin ?? "5px";
+
+        this.mainPanel.appendChild(label);
+        return label;
+    }
+
+    createButton(text) {
+        let btn = document.createElement("button");
+        btn.innerText = text;
+        btn.style.height = "6%";
+        btn.style.width = "95%";
+        btn.style.marginTop = "5%";
+
+        this.mainPanel.appendChild(btn);
+
+        if (this.leftMargin === null) {
+            let left = btn.clientWidth * 5 / 100;
+            left /= 2;
+            this.leftMargin = left + "px";
+        }
+
+        btn.style.marginLeft = this.leftMargin;
+
+        return btn;
+    }
+
+    createCheckbox(text) {
+        let label = document.createElement("label");
+        label.innerText = text;
+        label.style.color = "white";
+        label.style.display = "inline-block";
+        label.style.marginTop = "5%";
+        label.style.fontSize = "13px";
+        label.style.fontWeight = "bold";
+
+        let check = document.createElement("input");
+        check.type = "checkbox";
+        check.style.position = "relative";
+
+        this.mainPanel.appendChild(label);
+        label.appendChild(check);
+        
+        check.style.left = "-" + (label.clientWidth) + "px";
+        label.style.marginLeft = (check.clientWidth + 10) + "px";
+
+        return [check, label];
+    }
+
+    createCheckboxAndButton(text) {
+        let checkbox = this.createCheckbox(text);
+
+        let btn = document.createElement("Button");
+        btn.style.height = "16px";
+        btn.style.width = "16px";
+        btn.style.position = "relative";
+        btn.style.left = "-12px";
+        btn.style.top = "4px";
+        checkbox[1].appendChild(btn);
+
+        return [checkbox[0], checkbox[1], btn];
+    }
+}
+
+class Setting {
+    constructor(key, defaultValue) {
+        this.key = key;
+        this.defaultValue = defaultValue;
+
+        if (this.read() === null) this.write(defaultValue);
+    }
+
+    read() {
+        return localStorage.getItem(this.key);
+    }
+
+    write(value) {
+        localStorage.setItem(this.key, value);
+    }
+}
+
+class BoolSetting extends Setting {
+    constructor(key, defaultValue) {
+        super(key, defaultValue);
+        this.read = this._read;
+    }
+
+    _read() {
+        let val = super.read().toLowerCase();
+        return val === "true" || val === "1";
+    }
+}
+
+class NumberSetting extends Setting {
+    constructor(key, defaultValue) {
+        super(key, defaultValue)
+        this.read = this._read;
+    }
+
+    _read() {
+        let val = Number(super.read());
+        if (isNaN(val)) val = 0;
+        return val;
+    }
+}
+
+var cfg_removeAds = new BoolSetting("mod_removeAds", false),
+    cfg_quality = new NumberSetting("quality", 0.75), 
+    cfg_zoomHack = new BoolSetting("mod_zoomHack", true), 
+    cfg_zoomValue = new NumberSetting("mod_zoomValue", 13);
+
+var style = document.createElement("style");
+style.innerHTML = '.scr1ptPanel {background:rgba(0,60,0,0.5); border-style: solid; border-width: 3px; border-color: rgb(60,185,60,0.5); border-radius: 5px;} .scr1ptButton {line-height: 1; outline: none; color: white; background-color: #5CB85C; border-radius: 4px; border-width: 0px; transition: 0.2s;} .scr1ptButton:hover {background-color: #5ed15e; cursor: pointer;} .scr1ptButton:active {background-color: #4e9c4e;} .scr1ptButton.unselected {opacity: 0.5;} .scr1ptButton .spinner {display: none; vertical-align: middle;} .scr1ptButton.button-loading {background-color: #7D7D7D; color: white;} .scr1ptButton.button-loading .spinner {display: inline-block;} .scr1ptButton-grey {color: black; background-color: #f5f5f5;} .scr1ptButton-grey:hover {background-color: white; color: #5e5e5e;} .scr1ptButton-grey:active {background-color: #cccccc; color: #5e5e5e;} .scr1ptButton-gold {background-color: #c9c818;} .scr1ptButton-gold:hover {background-color: #d9d71a;} .scr1ptButton-gold:active {background-color: #aba913;}';
+
+var superhex,
+    originalMathMax, originalOnMouseWheel,
     stopRemoveAdsService = false, adElem,
     customQualityButton,
-    originalMathMax, originalOnMouseWheel,
     leaderboard, minimap, friendsScores, score, fps;
-
-style.innerHTML = '.scr1ptPanel {background:rgba(0,60,0,0.5); border-style: solid; border-width: 3px; border-color: rgb(60,185,60,0.5); border-radius: 5px;} .scr1ptButton {line-height: 1; outline: none; color: white; background-color: #5CB85C; border-radius: 4px; border-width: 0px; transition: 0.2s;} .scr1ptButton:hover {background-color: #5ed15e; cursor: pointer;} .scr1ptButton:active {background-color: #4e9c4e;} .scr1ptButton.unselected {opacity: 0.5;} .scr1ptButton .spinner {display: none; vertical-align: middle;} .scr1ptButton.button-loading {background-color: #7D7D7D; color: white;} .scr1ptButton.button-loading .spinner {display: inline-block;} .scr1ptButton-grey {color: black; background-color: #f5f5f5;} .scr1ptButton-grey:hover {background-color: white; color: #5e5e5e;} .scr1ptButton-grey:active {background-color: #cccccc; color: #5e5e5e;} .scr1ptButton-gold {background-color: #c9c818;} .scr1ptButton-gold:hover {background-color: #d9d71a;} .scr1ptButton-gold:active {background-color: #aba913;}';
 
 function init() {
     superhex = window.superhex;
@@ -37,12 +163,11 @@ function init() {
     createGui();
 
     adElem = document.getElementById("TKS_superhex-io_300x250");
-    if (AdsTBM) removeAdsService();
+    if (cfg_removeAds.read()) removeAdsService();
 
-    zoomValue = zoomValue ? Number(zoomValue) : 13;
-    if (zoomHack == "True") toggleZoomHack(true);
+    if (cfg_zoomHack.read()) toggleZoomHack(true);
 
-    changeQuality(currQuality ?? 0.75);
+    changeQuality(cfg_quality.read());
     document.getElementById("button-quality-high").onclick = () => changeQuality(1);
     document.getElementById("button-quality-medium").onclick = () => changeQuality(0.75);
     document.getElementById("button-quality-low").onclick = () => changeQuality(0.5);
@@ -56,15 +181,14 @@ function init() {
     window.addEventListener("keyup", onKeyUp);
 }
 
-function changeQuality(qualityValue) {
-    superhex.setQuality(qualityValue);
+function changeQuality(quality) {
+    superhex.setQuality(quality);
 
-    currQuality = localStorage.getItem("quality");
     customQualityButton.innerText = "Custom Quality";
 
-    if (currQuality != 1 && currQuality != 0.75 && currQuality != 0.5) {
+    if (quality != 1 && quality != 0.75 && quality != 0.5) {
         customQualityButton.className = "scr1ptButton";
-        customQualityButton.innerText += " (" + currQuality + ")";
+        customQualityButton.innerText += " (" + quality + ")";
         return;
     }
 
@@ -89,11 +213,11 @@ function toggleRemoveAds(restoreAds) {
     stopRemoveAdsService = restoreAds;
 
     if (restoreAds) {
-        localStorage.removeItem("AdsTBM");
+        cfg_removeAds.write(false);
         return;
     }
     
-    localStorage.setItem("AdsTBM", true);
+    cfg_removeAds.write(true);;
     removeAdsService();
 }
 
@@ -174,15 +298,15 @@ function unlockSkins() {
 
 function toggleZoomHack(enable) {
     if (!enable) {
-        localStorage.removeItem("zoomTBM");
+        cfg_zoomHack.write(false);
         Math.max = originalMathMax;
         window.onmousewheel = originalOnMouseWheel;
     } else {
         Math.max = (a, b) => {
-            return a == window.innerWidth / 40 / 2 / .75 && b == window.innerHeight / 40 / Math.sqrt(3) ? zoomValue : originalMathMax(a, b);
+            return a == window.innerWidth / 40 / 2 / .75 && b == window.innerHeight / 40 / Math.sqrt(3) ? cfg_zoomValue.read() : originalMathMax(a, b);
         };
 
-        localStorage.setItem("zoomTBM", "True");
+        cfg_zoomHack.write(true);
 
         window.onmousewheel = function(e) {
             if (originalOnMouseWheel) originalOnMouseWheel();
@@ -191,21 +315,19 @@ function toggleZoomHack(enable) {
             if (!e) e = window.event;
             if (e.wheelDelta) delta = e.wheelDelta / 60; else if (e.detail) delta = -e.detail / 2;
 
-            let oldValue = zoomValue;
+            let value = cfg_zoomValue.read();
             if (delta !== null && delta > 0) {
-               if (zoomValue < 60) zoomValue += zoomValue < 16 ? 1 : 2;
+               if (value < 60) value += value < 16 ? 1 : 2;
             } else {
-               if (zoomValue > 5) zoomValue -= zoomValue < 16 ? 1 : 2;
+               if (value > 5) value -= value < 16 ? 1 : 2;
             }
 
-            if (oldValue != zoomValue) {
+            if (value != cfg_zoomValue.read()) {
                 window.dispatchEvent(new Event('resize'));
-                localStorage.setItem("zoomValTBM", zoomValue);
+                cfg_zoomValue.write(value);
             }
         };
     }
-
-    zoomHack = localStorage.getItem("zoomTBM");
 }
 
 function setZoomHackValue() {
@@ -218,7 +340,7 @@ function setZoomHackValue() {
         else if (zoomHPrompt.toString() == "NaN") alert("Invalid value. Make sure to only use numbers."); 
         else {
             wzoomValue = zoomHPrompt;
-            localStorage.setItem("zoomValTBM", zoomHPrompt);
+            cfg_zoomValue.write(zoomHPrompt);
         }
     }
 }
@@ -233,7 +355,7 @@ function initObserver() {
         mutations.forEach(({addedNodes}) => {
             addedNodes.forEach(node => {
                 if (node.src) {
-                    if (AdsTBM) {
+                    if (cfg_removeAds.read()) {
                         // Prevent ads-related scripts from loading
                         if (node.src.includes('criteo') || node.src.includes('adin') || node.src.includes('analytics')) {
                             console.debug('Removing ' + node.src)
@@ -310,11 +432,11 @@ function createGui() {
 
     let removeAdsCheckbox = panel.createCheckbox("Remove ads")[0]
     removeAdsCheckbox.onclick = () => toggleRemoveAds(!removeAdsCheckbox.checked);
-    removeAdsCheckbox.checked = AdsTBM;
+    removeAdsCheckbox.checked = cfg_removeAds.read();
 
     let zoomHackCheckbox = panel.createCheckboxAndButton("Zoom Hack");
     zoomHackCheckbox[0].onclick = () => toggleZoomHack(zoomHackCheckbox[0].checked);
-    zoomHackCheckbox[0].checked = zoomHack == "True";
+    zoomHackCheckbox[0].checked = cfg_zoomHack.read();
 
     zoomHackCheckbox[2].className = "scr1ptButton";
     zoomHackCheckbox[2].innerHTML = "<img src='https://lh3.googleusercontent.com/Abm4DjvPOP55GK2MCe9gYh8M1ZJa7ws71oXcW2q6Rl1pQXIQ_bUcVxbN5vZ8_6pmP248O-uQEN2fUxq-xzFlzefdXyEBakvzEgGKzIwSkcdSBHdM2PwtgpgXbMvbP_N7FSI4BYIujg=s16-no' style='position: relative; left: -6px; top: -1px;'/>";
@@ -332,86 +454,6 @@ function createGui() {
 
     let hotkeysLabel = hotkeysPanel.createLabel("Hotkeys:\n\n1 = Hide/show Leaderboard.\n0 = Hide/show UI.\n2 = Hide/show FPS and connection info.");
     hotkeysLabel.style.marginLeft = "10px";
-}
-
-class ModPanel {
-    constructor(parent) {
-        let mainPanel = document.createElement("div");
-
-        parent.appendChild(mainPanel);
-        this.mainPanel = mainPanel;
-        this.leftMargin = null;
-    }
-
-    createLabel(text) {
-        let label = document.createElement("label");
-        label.innerText = text;
-        label.style.width = "100%";
-        label.style.color = "white";
-        label.style.display = "inline-block";
-        label.style.marginTop = "5%";
-        label.style.fontWeight = "bold";
-        label.style.marginLeft = this.leftMargin ?? "5px";
-
-        this.mainPanel.appendChild(label);
-        return label;
-    }
-
-    createButton(text) {
-        let btn = document.createElement("button");
-        btn.innerText = text;
-        btn.style.height = "6%";
-        btn.style.width = "95%";
-        btn.style.marginTop = "5%";
-
-        this.mainPanel.appendChild(btn);
-
-        if (this.leftMargin === null) {
-            let left = btn.clientWidth * 5 / 100;
-            left /= 2;
-            this.leftMargin = left + "px";
-        }
-
-        btn.style.marginLeft = this.leftMargin;
-
-        return btn;
-    }
-
-    createCheckbox(text) {
-        let label = document.createElement("label");
-        label.innerText = text;
-        label.style.color = "white";
-        label.style.display = "inline-block";
-        label.style.marginTop = "5%";
-        label.style.fontSize = "13px";
-        label.style.fontWeight = "bold";
-
-        let check = document.createElement("input");
-        check.type = "checkbox";
-        check.style.position = "relative";
-
-        this.mainPanel.appendChild(label);
-        label.appendChild(check);
-        
-        check.style.left = "-" + (label.clientWidth) + "px";
-        label.style.marginLeft = (check.clientWidth + 10) + "px";
-
-        return [check, label];
-    }
-
-    createCheckboxAndButton(text) {
-        let checkbox = this.createCheckbox(text);
-
-        let btn = document.createElement("Button");
-        btn.style.height = "16px";
-        btn.style.width = "16px";
-        btn.style.position = "relative";
-        btn.style.left = "-12px";
-        btn.style.top = "4px";
-        checkbox[1].appendChild(btn);
-
-        return [checkbox[0], checkbox[1], btn];
-    }
 }
 
 initObserver();
