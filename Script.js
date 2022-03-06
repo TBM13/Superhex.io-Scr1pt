@@ -24,8 +24,13 @@ var style = document.createElement("style"),
 style.innerHTML = '.scr1ptPanel {background:rgba(0,60,0,0.5); border-style: solid; border-width: 3px; border-color: rgb(60,185,60,0.5); border-radius: 5px;} .scr1ptButton {line-height: 1; outline: none; color: white; background-color: #5CB85C; border-radius: 4px; border-width: 0px; transition: 0.2s;} .scr1ptButton:hover {background-color: #5ed15e; cursor: pointer;} .scr1ptButton:active {background-color: #4e9c4e;} .scr1ptButton.unselected {opacity: 0.5;} .scr1ptButton .spinner {display: none; vertical-align: middle;} .scr1ptButton.button-loading {background-color: #7D7D7D; color: white;} .scr1ptButton.button-loading .spinner {display: inline-block;} .scr1ptButton-grey {color: black; background-color: #f5f5f5;} .scr1ptButton-grey:hover {background-color: white; color: #5e5e5e;} .scr1ptButton-grey:active {background-color: #cccccc; color: #5e5e5e;} .scr1ptButton-gold {background-color: #c9c818;} .scr1ptButton-gold:hover {background-color: #d9d71a;} .scr1ptButton-gold:active {background-color: #aba913;}';
 
 function init() {
-    document.getElementsByTagName("head")[0].appendChild(style);
     superhex = window.superhex;
+    if (superhex == null) {
+        setTimeout(init, 100);
+        return;
+    }
+
+    document.getElementsByTagName("head")[0].appendChild(style);
     originalMathMax = Math.max;
     originalOnMouseWheel = window.onmousewheel;
 
@@ -227,7 +232,6 @@ function initObserver() {
     new MutationObserver(mutations => {
         mutations.forEach(({addedNodes}) => {
             addedNodes.forEach(node => {
-                if (node?.src?.includes('game')) console.info(node.src);
                 if (node.src) {
                     if (AdsTBM) {
                         // Prevent ads-related scripts from loading
@@ -236,6 +240,21 @@ function initObserver() {
                             node.type = 'javascript/blocked'
                             node.parentElement.removeChild(node)
                         }
+                    }
+
+                    if (node.src.includes('game.min.js')) {
+                        console.debug("Injecting " + node.src);
+                        node.type = 'javascript/blocked'
+                        node.parentElement.removeChild(node)
+
+                        fetch(node.src)
+                            .then(res => res.text())
+                            .then(script => {
+                                script = script.replace("var superhex=function()", "window.superhex=function()");
+                                
+                                Function(script)();
+                                superhex = window.superhex;
+                            })
                     }
                 }
             })
