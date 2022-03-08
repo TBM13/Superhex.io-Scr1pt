@@ -135,11 +135,12 @@ class NumberSetting extends Setting {
     }
 }
 
-var cfg_removeAds = new BoolSetting("mod_removeAds", false),
-    cfg_quality = new NumberSetting("quality", 0.75), 
-    cfg_zoomHack = new BoolSetting("mod_zoomHack", true), 
+var cfg_quality = new NumberSetting("quality", 0.75),
+    cfg_preferredServer = new Setting("mod_preferredServer", ""),
+    cfg_removeAds = new BoolSetting("mod_removeAds", false),
+    cfg_zoomHack = new BoolSetting("mod_zoomHack", true),
     cfg_zoomValue = new NumberSetting("mod_zoomValue", 13),
-    cfg_preferredServer = new Setting("mod_preferredServer", "");
+    cfg_showKills = new BoolSetting("mod_showKills", false);
 
 var style = document.createElement("style");
 style.innerHTML = '.scr1ptPanel {background:rgba(0,60,0,0.5); border-style: solid; border-width: 3px; border-color: rgb(60,185,60,0.5); border-radius: 5px;} .scr1ptButton {line-height: 1; outline: none; color: white; background-color: #5CB85C; border-radius: 4px; border-width: 0px; transition: 0.2s;} .scr1ptButton:hover {background-color: #5ed15e; cursor: pointer;} .scr1ptButton:active {background-color: #4e9c4e;} .scr1ptButton.unselected {opacity: 0.5;} .scr1ptButton .spinner {display: none; vertical-align: middle;} .scr1ptButton.button-loading {background-color: #7D7D7D; color: white;} .scr1ptButton.button-loading .spinner {display: inline-block;} .scr1ptButton-grey {color: black; background-color: #f5f5f5;} .scr1ptButton-grey:hover {background-color: white; color: #5e5e5e;} .scr1ptButton-grey:active {background-color: #cccccc; color: #5e5e5e;} .scr1ptButton-gold {background-color: #c9c818;} .scr1ptButton-gold:hover {background-color: #d9d71a;} .scr1ptButton-gold:active {background-color: #aba913;}';
@@ -148,6 +149,7 @@ var superhex, injected,
     originalMathMax, originalOnMouseWheel,
     stopRemoveAdsService = false, adElem,
     customQualityButton,
+    lastKill = [new Date().getTime(), "", ""],
     leaderboard, minimap, friendsScores, score, fps;
 
 function initObserver() {
@@ -200,7 +202,12 @@ function injectGame(script) {
     // Server list
     script = script.replace('console.log("kept zone ping",e.z,wt[e.z])', 
                             'console.log("kept zone ping",e.z,wt[e.z],", reporting to Mod"),window.addServer(e.z,wt[e.z])')
-                    .replace('.open("GET",MM_URL+"?zone="+(n||"")', '.open("GET",MM_URL+"?zone="+(window.preferredServer||n||"")');
+                   .replace('.open("GET",MM_URL+"?zone="+(n||"")', 
+                            '.open("GET",MM_URL+"?zone="+(window.preferredServer||n||"")');
+
+    // Show kills
+    script = script.replace('delete ln[i],delete sn[i],delete dn[i]', 
+                            'window.showKill(sn[i],i,sn[a],a),delete ln[i],delete sn[i],delete dn[i]')
 
     console.debug("Loading modified Game...")
 
@@ -260,6 +267,38 @@ function changePreferredServer(item) {
     cfg_preferredServer.write(zone);
 }
 
+window.showKill = (victim, victimId, killer, killerId) => {
+    let text = document.getElementById("killsText");
+    if (text == null) return;
+
+    let time = new Date().getTime();
+    let msg;
+    if (killerId == 0) {
+        if (victimId == lastKill[2] && time - lastKill[0] < 1000) {
+            msg = lastKill[1] + " and " + victim + " killed each other";
+            text.innerText = text.innerText.substring(0, text.innerText.lastIndexOf('\n'));
+        }
+        else msg = victim + " hit the map border";
+    }
+    else if (victimId == killerId) msg = victim + " killed themselves";
+    else msg = victim + " killed by " + killer;
+
+    if ((victim == null) || (killer == null && killerId != 0)) {
+        console.log("Ignored kill due to victim/killer username being null:", victim, victimId, killer, killerId);
+        return;
+    }
+
+    let lines = text.innerText.split("\n");
+    if (lines.length > 5)
+    {
+        lines.splice(0,1);
+        text.innerText = lines.join('\n');
+    }
+
+    lastKill = [time, victim, killerId];
+    text.innerText += "\n" + msg;
+};
+
 function init() {
     superhex = window.superhex;
     if (superhex == null) {
@@ -283,6 +322,7 @@ function init() {
     if (cfg_removeAds.read()) removeAdsService();
     if (cfg_zoomHack.read()) toggleZoomHack(true);
     if (cfg_preferredServer.read().length > 0) window.preferredServer = cfg_preferredServer.read();
+    if (cfg_showKills.read()) toggleShowKills(true);
 
     changeQuality(cfg_quality.read());
     document.getElementById("button-quality-high").onclick = () => changeQuality(1);
@@ -445,6 +485,26 @@ function toggleZoomHack(enable) {
     }
 }
 
+function toggleShowKills(enable) {
+    cfg_showKills.write(enable);
+
+    if (enable) {
+        let killsText = document.createElement("h4");
+        killsText.style.color = "rgba(255,255,255,0.6)";
+        killsText.style.position = "fixed";
+        killsText.style.textAlign = "center";
+        killsText.style.right = "10px";
+        killsText.style.bottom = "0px";
+        killsText.style.zIndex = "1";
+        killsText.id = "killsText";
+        window.document.body.appendChild(killsText);
+
+        return;
+    }
+
+    document.getElementById("killsText").remove();
+}
+
 function changeZoom(zoomIn) {
     let value = cfg_zoomValue.read();
     let increaser = 2;
@@ -515,6 +575,13 @@ function createGui() {
     let zoomHackCheckbox = panel.createCheckbox("Zoom Hack")[0];
     zoomHackCheckbox.onclick = () => toggleZoomHack(zoomHackCheckbox.checked);
     zoomHackCheckbox.checked = cfg_zoomHack.read();
+
+    let showKillsCheckbox = panel.createCheckbox("Show Kills")[0];
+    if (injected) {
+        showKillsCheckbox.onclick = () => toggleShowKills(showKillsCheckbox.checked);
+        showKillsCheckbox.checked = cfg_showKills.read();
+    }
+    else showKillsCheckbox.disabled = true;
 
     let hotkeysPanel = new ModPanel(homepage);
     hotkeysPanel.mainPanel.className = "scr1ptPanel";
